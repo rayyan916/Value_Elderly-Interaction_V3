@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不怕囉唆 & 最怕生疏 | 價值觀教育人生模擬遊戲</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans TC & Noto Serif TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tone.js for gentle UI sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    },
+                    colors: {
+                        warm: {
+                            50: '#fdfaf6',
+                            100: '#f7efe4',
+                            200: '#efe0c9',
+                            300: '#e2c6a0',
+                            400: '#d3a571',
+                            500: '#c68a4d',
+                            600: '#b8733e',
+                            700: '#995b35',
+                            800: '#7c4a30',
+                            900: '#653e29',
+                        },
+                        jade: {
+                            50: '#f2f8f6',
+                            100: '#ddeee8',
+                            500: '#408c76',
+                            600: '#31705e',
+                            700: '#295a4c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f7efe4;
+            background-image: radial-gradient(#e2c6a0 0.75px, transparent 0.75px), radial-gradient(#e2c6a0 0.75px, #fdfaf6 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: #3d2c1e;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(253, 250, 246, 0.94);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(211, 165, 113, 0.35);
+            box-shadow: 0 10px 30px -5px rgba(101, 62, 41, 0.08);
+        }
+
+        .chat-bubble-left {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2c6a0;
+            border-radius: 1rem 1rem 1rem 0.25rem;
+        }
+
+        .chat-bubble-right {
+            position: relative;
+            background: #eef7f4;
+            border: 1px solid #a6d4c5;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+        }
+
+        .timeline-log::-webkit-scrollbar {
+            width: 6px;
+        }
+        .timeline-log::-webkit-scrollbar-track {
+            background: #f7efe4;
+            border-radius: 8px;
+        }
+        .timeline-log::-webkit-scrollbar-thumb {
+            background: #d3a571;
+            border-radius: 8px;
+        }
+
+        @keyframes pulse-gentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-gentle {
+            animation: pulse-gentle 2.5s infinite ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation / Status Header -->
+    <header class="sticky top-0 z-30 glass-card border-b border-warm-200 px-3 sm:px-6 py-2.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-warm-600 text-white flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-Hands-holding-child text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-serif font-bold text-base sm:text-lg text-warm-900 tracking-wide leading-tight">
+                        不怕囉唆 <span class="text-warm-600">&amp;</span> 最怕生疏
+                    </h1>
+                    <p class="text-[11px] text-warm-700 hidden sm:block">中華孝親文化與跨代同理心生命教育模擬</p>
+                </div>
+            </div>
+
+            <!-- Real-time Demographic Ticker -->
+            <div class="hidden lg:flex items-center gap-2 bg-warm-100/90 border border-warm-200 px-3 py-1 rounded-full text-xs text-warm-800 max-w-md truncate">
+                <span class="bg-warm-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">人口統計實況</span>
+                <span id="header-stat-ticker" class="truncate">香港男女平均預期壽命位列全球前茅（男82.5歲 / 女87.9歲，政府統計處）</span>
+            </div>
+
+            <!-- Sound & Info Controls -->
+            <div class="flex items-center gap-2">
+                <button id="btn-sound" onclick="toggleSound()" class="px-3 py-1.5 rounded-xl bg-warm-100 hover:bg-warm-200 text-warm-800 text-xs font-medium flex items-center gap-1.5 transition" title="音效開關">
+                    <i id="icon-sound" class="fa-solid fa-volume-high"></i>
+                    <span class="hidden sm:inline">音效</span>
+                </button>
+                <button onclick="openModal('modal-stats-info')" class="px-3 py-1.5 rounded-xl bg-jade-50 hover:bg-jade-100 text-jade-700 border border-jade-100 text-xs font-medium flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-earth-asia"></i>
+                    <span>人口數據庫</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 flex flex-col justify-center">
+
+        <!-- ================= SCREEN 1: INTRO & NAME INPUT ================= -->
+        <section id="screen-intro" class="max-w-3xl mx-auto w-full fade-in">
+            <div class="glass-card rounded-3xl p-6 sm:p-10 border-2 border-warm-200 relative overflow-hidden">
+                <!-- Decorative background icon -->
+                <i class="fa-solid fa-tree text-warm-200/40 text-9xl absolute -bottom-6 -right-6 pointer-events-none"></i>
+
+                <div class="text-center max-w-xl mx-auto">
+                    <span class="inline-block px-3.5 py-1 rounded-full bg-warm-200/80 text-warm-900 font-semibold text-xs mb-3">
+                        價值觀教育互動體驗 · 0歲至85歲的人生旅程
+                    </span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-black text-warm-900 mb-3 leading-snug">
+                        「不怕長輩囉唆，<br class="sm:hidden">最怕彼此生疏」
+                    </h2>
+                    <p class="text-sm sm:text-base text-warm-800 leading-relaxed mb-6">
+                        小時候，長輩總愛反覆叮嚀「著多件衫」、「食飽未」；<br>
+                        長大後，當我們也有了自己的兒孫，才發現每一句「囉唆」背後，原來都藏著說不出口的掛念與退化中的無助。
+                    </p>
+                </div>
+
+                <!-- 3 Educational Goals -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
+                    <div class="bg-white/80 p-4 rounded-2xl border border-warm-200 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-2 font-bold">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-warm-900 mb-1">尊重包容・主動溝通</h3>
+                        <p class="text-xs text-warm-700">學習以正面態度回應長輩的關心、讚賞、擔心與求助</p>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-warm-200 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center mb-2 font-bold">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-warm-900 mb-1">感同身受・珍惜時光</h3>
+                        <p class="text-xs text-warm-700">體會長輩因視聽力及身體機能退化所產生的真實需要</p>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-warm-200 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full bg-jade-100 text-jade-700 flex items-center justify-center mb-2 font-bold">
+                            <i class="fa-solid fa-people-roof"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-warm-900 mb-1">中華文化・孝親傳承</h3>
+                        <p class="text-xs text-warm-700">經歷從「孫輩」到「祖輩」的角色轉換，感悟孝道的可貴</p>
+                    </div>
+                </div>
+
+                <!-- Global Data Highlight Box -->
+                <div class="bg-warm-100/90 rounded-2xl p-4 mb-7 border border-warm-300 text-xs sm:text-sm text-warm-900">
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-chart-pie text-warm-600 text-lg mt-0.5"></i>
+                        <div>
+                            <p class="font-bold mb-1">結合國際與香港真實人口統計設定：</p>
+                            <p class="text-warm-800 leading-relaxed text-xs">
+                                本遊戲根據<strong>香港政府統計處、世界衛生組織 (WHO)、聯合國及世界銀行</strong>資料設計。香港65歲及以上長者比例正邁向超過30%，而85歲剛好是香港整體人口預期壽命的中位指標。在85年的人生裡，你將隨機獲得獨特的家庭、長輩及日後兒孫配置。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Form -->
+                <div class="max-w-md mx-auto">
+                    <label for="player-name-input" class="block text-sm font-bold text-warm-900 mb-2 text-center">
+                        請輸入你的名字，開啟85年的人生故事：
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-2.5">
+                        <input
+                            type="text"
+                            id="player-name-input"
+                            maxlength="12"
+                            placeholder="例如：陳一心 / 曉明"
+                            class="flex-grow px-4 py-3 rounded-2xl border-2 border-warm-300 bg-white text-warm-900 font-medium focus:outline-none focus:border-warm-600 text-center sm:text-left"
+                        >
+                        <button
+                            onclick="generateInitialProfile()"
+                            class="px-6 py-3 rounded-2xl bg-warm-600 hover:bg-warm-700 active:scale-95 text-white font-bold shadow-md transition flex items-center justify-center gap-2 shrink-0"
+                        >
+                            <span>生成我的人生設定</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <p id="name-error-msg" class="text-rose-600 text-xs mt-1.5 text-center hidden">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>請先輸入你的姓名才開始遊戲喔！
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 2: RANDOMIZED PROFILE OVERVIEW ================= -->
+        <section id="screen-profile" class="hidden w-full fade-in">
+            <div class="glass-card rounded-3xl p-5 sm:p-8 border-2 border-warm-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-warm-200">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-warm-600 bg-warm-100 px-3 py-1 rounded-full">
+                            命運隨機配置完成
+                        </span>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-warm-900 mt-2">
+                            <span id="prof-player-name" class="text-warm-700 underline decoration-warm-400"></span> 的家庭與跨代檔案
+                        </h2>
+                        <p class="text-xs sm:text-sm text-warm-700 mt-1">
+                            系統已根據人口統計分佈，隨機安排你的成長背景、祖輩長輩狀況，以及你未來成年後的兒孫命運（長輩與孫輩的實際壽命已隱藏，將隨歲月推進自然發生）。
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button onclick="rerollProfile()" class="px-4 py-2.5 rounded-2xl border-2 border-warm-400 text-warm-800 hover:bg-warm-100 font-bold text-xs sm:text-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-dice"></i>
+                            <span>重新隨機生成</span>
+                        </button>
+                        <button onclick="startLifeSimulation()" class="px-6 py-2.5 rounded-2xl bg-jade-600 hover:bg-jade-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 animate-gentle">
+                            <i class="fa-solid fa-play"></i>
+                            <span>由 0 歲開始人生</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid of 3 Generations Info -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <!-- Left Column: Player & Parents & Future Children (4 cols) -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="bg-white rounded-2xl p-4 border border-warm-200 shadow-sm">
+                            <h3 class="font-bold text-warm-900 text-sm flex items-center gap-2 border-b border-warm-100 pb-2 mb-3">
+                                <i class="fa-solid fa-user-graduate text-warm-600"></i>
+                                <span>玩家個人與原生家庭設定</span>
+                            </h3>
+                            <div id="prof-player-details" class="space-y-2 text-xs sm:text-sm text-warm-800"></div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 border border-warm-200 shadow-sm">
+                            <h3 class="font-bold text-warm-900 text-sm flex items-center gap-2 border-b border-warm-100 pb-2 mb-3">
+                                <i class="fa-solid fa-seedling text-jade-600"></i>
+                                <span>未來成年後的子女與孫輩預覽</span>
+                            </h3>
+                            <p class="text-[11px] text-warm-600 mb-2">
+                                （當你踏入成年、中年及老年階段時，這些兒孫將陸續出生並與你頻繁互動）
+                            </p>
+                            <div id="prof-future-offspring" class="space-y-2 text-xs sm:text-sm text-warm-800"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Grandparents Detailed Cards (8 cols) -->
+                    <div class="lg:col-span-8 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-bold text-warm-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-person-cane text-warm-600"></i>
+                                    <span>陪伴你成長的長輩（爺爺 / 嫲嫲 / 公公 / 婆婆）</span>
+                                </h3>
+                                <span id="prof-gp-count-badge" class="text-xs bg-warm-200 text-warm-900 px-2.5 py-0.5 rounded-full font-bold"></span>
+                            </div>
+                            <div id="prof-grandparents-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+                        </div>
+
+                        <!-- Future Grandchildren Detailed Mini Cards -->
+                        <div class="mt-5 pt-4 border-t border-warm-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-bold text-jade-700 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-baby text-jade-600"></i>
+                                    <span>你中老年時將擁有的孫輩設定（共 <span id="prof-gc-count"></span> 位）</span>
+                                </h3>
+                                <span class="text-[11px] text-warm-600">角色互換：屆時由你決定如何向他們表達關心</span>
+                            </div>
+                            <div id="prof-grandchildren-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 3: MAIN SIMULATION (0 - 85 YEARS OLD) ================= -->
+        <section id="screen-game" class="hidden w-full fade-in">
+            <!-- Top Age & Stage Progress Bar -->
+            <div class="glass-card rounded-2xl p-4 mb-4 border border-warm-200">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                    <div class="flex items-center gap-3">
+                        <div id="game-avatar-badge" class="w-12 h-12 rounded-2xl bg-warm-600 text-white flex items-center justify-center text-2xl shadow-sm">
+                            👶
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="game-player-name" class="font-serif font-bold text-lg text-warm-900"></span>
+                                <span id="game-stage-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">嬰兒期</span>
+                                <span id="game-role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warm-200 text-warm-900">你的身分：孫輩</span>
+                            </div>
+                            <p id="game-status-subtitle" class="text-xs text-warm-700 mt-0.5"></p>
+                        </div>
+                    </div>
+
+                    <!-- Age Counter & Speed Controls -->
+                    <div class="flex items-center gap-3 ml-auto">
+                        <div class="text-right">
+                            <span class="text-xs text-warm-600 block">目前年齡</span>
+                            <span class="font-serif font-black text-2xl sm:text-3xl text-warm-900"><span id="game-age-num">0</span> <small class="text-sm font-normal">歲 / 85歲</small></span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-warm-100 p-1.5 rounded-xl border border-warm-200">
+                            <button id="btn-pause-resume" onclick="toggleSimulationPause()" class="px-3 py-1.5 rounded-lg bg-warm-600 text-white text-xs font-bold hover:bg-warm-700 transition flex items-center gap-1">
+                                <i id="icon-pause-resume" class="fa-solid fa-pause"></i>
+                                <span id="text-pause-resume">暫停推進</span>
+                            </button>
+                            <button id="btn-speed" onclick="cycleSpeed()" class="px-2.5 py-1.5 rounded-lg bg-white text-warm-800 border border-warm-200 text-xs font-bold hover:bg-warm-50 transition" title="調整歲月推進速度">
+                                <span id="text-speed">1x 速度</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar with Stage Markers -->
+                <div class="relative pt-1">
+                    <div class="overflow-hidden h-3 text-xs flex rounded-full bg-warm-200">
+                        <div id="game-age-bar" style="width: 0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-amber-500 via-warm-600 to-jade-600 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] sm:text-xs text-warm-700 font-medium mt-1 px-1">
+                        <span>0歲 嬰兒</span>
+                        <span>3歲 幼兒</span>
+                        <span>6歲 兒童</span>
+                        <span>12歲 少年</span>
+                        <span>18歲 青年</span>
+                        <span>25歲 成年</span>
+                        <span>45歲 中年(抱孫)</span>
+                        <span>65歲 老年</span>
+                        <span>85歲 圓滿</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Responsive 3-Column Game Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+                <!-- Left Panel: Grandparents Status (3 cols on Desktop) -->
+                <div class="lg:col-span-3 glass-card rounded-2xl p-4 border border-warm-200 order-2 lg:order-1">
+                    <div class="flex items-center justify-between border-b border-warm-200 pb-2.5 mb-3">
+                        <h3 class="font-bold text-sm text-warm-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-cane text-warm-600"></i>
+                            <span>長輩狀況與親密度</span>
+                        </h3>
+                        <span id="gp-total-interactions-badge" class="text-[11px] bg-warm-100 text-warm-800 px-2 py-0.5 rounded-full font-bold">互動 0 次</span>
+                    </div>
+                    <div id="panel-grandparents-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Center Panel: Interactive Dialogue Stage & Life Stream (6 cols on Desktop) -->
+                <div class="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+
+                    <!-- Active Interaction Modal Box (Inside Center Stage) -->
+                    <div id="interaction-stage-card" class="glass-card rounded-3xl p-5 sm:p-6 border-2 border-warm-300 min-h-[380px] flex flex-col justify-between relative">
+
+                        <!-- Default State: Time Flowing Quietly + Proactive Interaction Buttons -->
+                        <div id="state-flowing" class="my-auto text-center py-6">
+                            <div class="w-14 h-14 rounded-full bg-warm-100 border-2 border-warm-300 text-warm-700 flex items-center justify-center mx-auto mb-3 text-xl animate-pulse">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <h4 id="flowing-title" class="font-serif font-bold text-lg text-warm-900 mb-1">歲月流轉，跨代故事持續發生中...</h4>
+                            <p id="flowing-desc" class="text-xs sm:text-sm text-warm-700 max-w-md mx-auto">
+                                每個成長階段都有密集的單人及多位長輩／多位孫兒齊聚互動。你亦可以隨時點擊下方按鈕<strong>主動找長輩或孫兒傾偈</strong>！
+                            </p>
+
+                            <!-- Proactive Interaction Action Bar -->
+                            <div id="proactive-action-bar" class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                                <button id="btn-proactive-gp" onclick="triggerProactiveInteraction('gp')" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-phone-volume"></i>
+                                    <span>主動向長輩問安 / 聚會</span>
+                                </button>
+                                <button id="btn-proactive-gc" onclick="triggerProactiveInteraction('gc')" class="hidden px-4 py-2 rounded-xl bg-jade-600 hover:bg-jade-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-comments"></i>
+                                    <span>主動找孫兒關心傾偈</span>
+                                </button>
+                            </div>
+
+                            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+                                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                                <span id="flowing-fact">小知識：根據世衛(WHO)研究，跨代正面溝通能顯著降低長者抑鬱風險及延緩認知退化。</span>
+                            </div>
+                        </div>
+
+                        <!-- Active State: Dialogue Event -->
+                        <div id="state-dialogue" class="hidden flex-col justify-between h-full">
+                            <!-- Speaker Header -->
+                            <div class="flex items-start justify-between gap-2 pb-3 mb-3 border-b border-warm-200">
+                                <div class="flex items-center gap-2.5">
+                                    <div id="dlg-avatar" class="px-2.5 py-1.5 rounded-2xl bg-warm-200 flex items-center justify-center text-xl shrink-0 tracking-tighter">
+                                        👵
+                                    </div>
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <span id="dlg-speaker-name" class="font-bold text-warm-900 text-sm sm:text-base"></span>
+                                            <span id="dlg-type-badge" class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800">關心叮嚀</span>
+                                            <span id="dlg-location-badge" class="px-2 py-0.5 rounded-md text-[11px] bg-warm-100 text-warm-800">同住日常</span>
+                                        </div>
+                                        <p id="dlg-speaker-health-note" class="text-[11px] text-warm-600 mt-0.5"></p>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span id="dlg-age-stamp" class="text-xs font-bold text-warm-700 bg-warm-100 px-2.5 py-1 rounded-lg block"></span>
+                                    <span id="dlg-queue-badge" class="text-[10px] text-amber-700 font-semibold mt-0.5 block"></span>
+                                </div>
+                            </div>
+
+                            <!-- Conversation Bubbles Area (Supports Multi-Speaker Bubbles!) -->
+                            <div id="dlg-messages-box" class="space-y-2.5 my-2 max-h-64 overflow-y-auto pr-1 timeline-log">
+                                <!-- Injected dynamically -->
+                            </div>
+
+                            <!-- Empathy Hint / Context Banner -->
+                            <div id="dlg-empathy-hint" class="bg-amber-50/90 border border-amber-200 rounded-xl px-3.5 py-2 my-2.5 text-xs text-amber-900 flex items-start gap-2">
+                                <i class="fa-solid fa-heart text-rose-500 mt-0.5"></i>
+                                <span id="dlg-empathy-text"></span>
+                            </div>
+
+                            <!-- Player Choices -->
+                            <div id="dlg-choices-container" class="space-y-2 mt-1">
+                                <!-- Buttons injected dynamically -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Life Event Log Box -->
+                    <div class="glass-card rounded-2xl p-4 border border-warm-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-xs sm:text-sm text-warm-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-book-open text-warm-600"></i>
+                                <span>85年人生足跡紀錄</span>
+                            </h3>
+                            <span class="text-[11px] text-warm-600">最新動態置頂</span>
+                        </div>
+                        <div id="life-timeline-log" class="timeline-log max-h-44 overflow-y-auto space-y-2 pr-1 text-xs">
+                            <!-- Log entries injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Children & Grandchildren Status + Stats (3 cols on Desktop) -->
+                <div class="lg:col-span-3 space-y-4 order-3">
+                    <!-- Grandchildren Panel -->
+                    <div class="glass-card rounded-2xl p-4 border border-warm-200">
+                        <div class="flex items-center justify-between border-b border-warm-200 pb-2.5 mb-3">
+                            <h3 class="font-bold text-sm text-jade-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-children text-jade-600"></i>
+                                <span>子女與孫輩狀況</span>
+                            </h3>
+                            <span id="panel-offspring-status-tag" class="text-[11px] bg-jade-50 text-jade-700 px-2 py-0.5 rounded-full">尚未成家</span>
+                        </div>
+                        <div id="panel-grandchildren-list" class="space-y-2.5">
+                            <p class="text-xs text-warm-600 py-4 text-center">
+                                當你踏入成年及中年階段，你的子女與孫輩將會陸續登場。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Values Scoreboard -->
+                    <div class="glass-card rounded-2xl p-4 border border-warm-200">
+                        <h3 class="font-bold text-sm text-warm-900 border-b border-warm-200 pb-2 mb-3 flex items-center gap-1.5">
+                            <i class="fa-solid fa-scale-balanced text-warm-600"></i>
+                            <span>跨代關係與孝親指標</span>
+                        </h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-warm-800 font-medium">對長輩同理心與包容度</span>
+                                    <span id="stat-empathy-val" class="font-bold text-warm-900">70%</span>
+                                </div>
+                                <div class="w-full h-2 bg-warm-200 rounded-full overflow-hidden">
+                                    <div id="stat-empathy-bar" class="h-full bg-amber-500 transition-all duration-300" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-warm-800 font-medium">與祖輩平均親密度</span>
+                                    <span id="stat-gp-bond-val" class="font-bold text-warm-900">70%</span>
+                                </div>
+                                <div class="w-full h-2 bg-warm-200 rounded-full overflow-hidden">
+                                    <div id="stat-gp-bond-bar" class="h-full bg-rose-500 transition-all duration-300" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-warm-800 font-medium">與孫輩平均親密度</span>
+                                    <span id="stat-gc-bond-val" class="font-bold text-jade-700">尚未解鎖</span>
+                                </div>
+                                <div class="w-full h-2 bg-warm-200 rounded-full overflow-hidden">
+                                    <div id="stat-gc-bond-bar" class="h-full bg-jade-500 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 4: 85 YEARS OLD SUMMARY, REFLECTION & SHARE ================= -->
+        <section id="screen-summary" class="hidden max-w-5xl mx-auto w-full fade-in">
+            <div class="glass-card rounded-3xl p-6 sm:p-10 border-2 border-warm-300">
+                <div class="text-center max-w-2xl mx-auto pb-6 border-b border-warm-200">
+                    <span class="inline-block px-3.5 py-1 rounded-full bg-warm-200 text-warm-900 font-bold text-xs mb-2">
+                        85載人生圓滿落幕 · 生命回顧與反思
+                    </span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-black text-warm-900 mb-2">
+                        <span id="sum-player-name"></span> 的跨代生命紀念冊
+                    </h2>
+                    <p id="sum-epitaph" class="text-sm sm:text-base text-warm-800 leading-relaxed"></p>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+                    <div class="bg-white p-4 rounded-2xl border border-warm-200 text-center">
+                        <span class="text-xs text-warm-600 block">人生享年</span>
+                        <span class="font-serif font-black text-2xl sm:text-3xl text-warm-900">85 歲</span>
+                        <span class="text-[11px] text-jade-700 block mt-1">符合香港長壽統計指標</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-warm-200 text-center">
+                        <span class="text-xs text-warm-600 block">祖輩最終關係評價</span>
+                        <span id="sum-gp-title" class="font-serif font-black text-xl sm:text-2xl text-rose-700">知心孝順</span>
+                        <span id="sum-gp-score" class="text-[11px] text-warm-700 block mt-1">親密度 85%</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-warm-200 text-center">
+                        <span class="text-xs text-warm-600 block">孫輩最終關係評價</span>
+                        <span id="sum-gc-title" class="font-serif font-black text-xl sm:text-2xl text-jade-700">慈祥睿智</span>
+                        <span id="sum-gc-score" class="text-[11px] text-warm-700 block mt-1">親密度 82%</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-warm-200 text-center">
+                        <span class="text-xs text-warm-600 block">跨代同理心指數</span>
+                        <span id="sum-empathy-score" class="font-serif font-black text-2xl sm:text-3xl text-amber-600">88 分</span>
+                        <span class="text-[11px] text-warm-700 block mt-1">孝親文化傳承度</span>
+                    </div>
+                </div>
+
+                <!-- Two Columns: Grandparent Summary vs Grandchildren Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                    <div class="bg-white/90 rounded-2xl p-5 border border-warm-200">
+                        <h3 class="font-bold text-warm-900 text-base flex items-center gap-2 mb-3 pb-2 border-b border-warm-100">
+                            <i class="fa-solid fa-person-cane text-warm-600"></i>
+                            <span>前半生回顧：你與長輩（爺嫲公婆）的點滴</span>
+                        </h3>
+                        <div id="sum-gp-breakdown" class="space-y-3 text-xs sm:text-sm text-warm-800"></div>
+                    </div>
+
+                    <div class="bg-white/90 rounded-2xl p-5 border border-warm-200">
+                        <h3 class="font-bold text-jade-800 text-base flex items-center gap-2 mb-3 pb-2 border-b border-warm-100">
+                            <i class="fa-solid fa-children text-jade-600"></i>
+                            <span>後半生回顧：當你成為長輩，與孫輩的互動</span>
+                        </h3>
+                        <div id="sum-gc-breakdown" class="space-y-3 text-xs sm:text-sm text-warm-800"></div>
+                    </div>
+                </div>
+
+                <!-- Interactive Reflection Section (Required by Prompt) -->
+                <div class="bg-amber-50/90 rounded-3xl p-5 sm:p-7 border-2 border-amber-200 mb-8">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-serif font-bold text-lg text-warm-900">生命教育深度反思：回到現實生活</h3>
+                            <p class="text-xs text-warm-700">走過遊戲中的85年，現在讓我們想想現實中身邊的長輩</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Question 1 -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-200">
+                            <label class="block font-bold text-sm text-warm-900 mb-2">
+                                1. 反思平日你每星期花多少時間陪伴或主動聯絡長輩？
+                            </label>
+                            <select id="reflect-time-select" onchange="updateReflectionPreview()" class="w-full px-3 py-2 rounded-xl border border-warm-300 text-xs sm:text-sm bg-warm-50 text-warm-900 mb-2">
+                                <option value="每天都有傾偈或問候（超過5小時/週）">每天都有傾偈或問候（超過5小時/週）</option>
+                                <option value="每星期飲茶或通電話1-2次（約2-4小時/週）">每星期飲茶或通電話1-2次（約2-4小時/週）</option>
+                                <option value="每個月才見面或聯絡一次">每個月才見面或聯絡一次</option>
+                                <option value="逢年過節才見面，平日較少主動聯絡">逢年過節才見面，平日較少主動聯絡</option>
+                            </select>
+                            <p class="text-[11px] text-warm-700 leading-relaxed">
+                                💡 <strong>統計啟示：</strong>假如長輩現年75歲，以香港平均預期壽命85歲推算，若每月只見面1次、每次2小時，你們餘下能面對面相處的時間其實不足 <strong>240小時（僅10天）</strong>。
+                            </p>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-200">
+                            <label class="block font-bold text-sm text-warm-900 mb-2">
+                                2. 今天起，你可以做些甚麼具體行動來了解長輩的需要和感受？
+                            </label>
+                            <div class="flex flex-wrap gap-1.5 mb-2">
+                                <button type="button" onclick="addActionTag('主動打電話或視像問候長輩')" class="text-[11px] bg-warm-100 hover:bg-warm-200 text-warm-800 px-2.5 py-1 rounded-full transition">+ 主動致電/視像</button>
+                                <button type="button" onclick="addActionTag('耐心教長輩用智能手機而不發脾氣')" class="text-[11px] bg-warm-100 hover:bg-warm-200 text-warm-800 px-2.5 py-1 rounded-full transition">+ 耐心教用手機</button>
+                                <button type="button" onclick="addActionTag('放慢語速傾聽他們講舊時的故事')" class="text-[11px] bg-warm-100 hover:bg-warm-200 text-warm-800 px-2.5 py-1 rounded-full transition">+ 傾聽昔日故事</button>
+                                <button type="button" onclick="addActionTag('留意長輩身體痛症並陪伴覆診')" class="text-[11px] bg-warm-100 hover:bg-warm-200 text-warm-800 px-2.5 py-1 rounded-full transition">+ 關心健康痛症</button>
+                            </div>
+                            <textarea
+                                id="reflect-action-input"
+                                rows="2"
+                                oninput="updateReflectionPreview()"
+                                placeholder="寫下你的孝親小承諾（會同步顯示在分享卡上）..."
+                                class="w-full px-3 py-2 rounded-xl border border-warm-300 text-xs sm:text-sm bg-warm-50 text-warm-900 focus:outline-none focus:border-warm-600"
+                            >主動打電話問候長輩，耐心傾聽他們的叮嚀，不再嫌他們囉唆。</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media Share Section -->
+                <div class="bg-white rounded-3xl p-5 sm:p-7 border border-warm-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="font-serif font-bold text-lg text-warm-900 flex items-center gap-2">
+                                <i class="fa-solid fa-share-nodes text-warm-600"></i>
+                                <span>分享我的「85年跨代感悟」至社交媒體</span>
+                            </h3>
+                            <p class="text-xs text-warm-700">將你的遊戲總結與孝親承諾分享給同學、朋友或家人，一起宣揚「不怕囉唆，最怕生疏」</p>
+                        </div>
+                        <button onclick="resetAndPlayAgain()" class="px-4 py-2 rounded-xl border border-warm-400 text-warm-800 hover:bg-warm-100 text-xs font-bold transition self-start sm:self-auto">
+                            <i class="fa-solid fa-rotate-right mr-1"></i>體驗另一段隨機人生
+                        </button>
+                    </div>
+
+                    <!-- Preview Share Text Box -->
+                    <div id="share-text-preview" class="bg-warm-50 border border-warm-200 rounded-2xl p-4 text-xs sm:text-sm text-warm-900 font-mono whitespace-pre-line mb-4"></div>
+
+                    <!-- Social Share Buttons -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button onclick="shareToPlatform('whatsapp')" class="px-4 py-2.5 rounded-xl bg-[#25D366] hover:opacity-90 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span>分享至 WhatsApp</span>
+                        </button>
+                        <button onclick="shareToPlatform('facebook')" class="px-4 py-2.5 rounded-xl bg-[#1877F2] hover:opacity-90 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition">
+                            <i class="fa-brands fa-facebook text-base"></i>
+                            <span>分享至 Facebook</span>
+                        </button>
+                        <button onclick="shareToPlatform('x')" class="px-4 py-2.5 rounded-xl bg-black hover:opacity-80 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition">
+                            <i class="fa-brands fa-x-twitter text-base"></i>
+                            <span>分享至 X / Threads</span>
+                        </button>
+                        <button onclick="copyShareSummary()" class="px-4 py-2.5 rounded-xl bg-warm-700 hover:bg-warm-800 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition">
+                            <i class="fa-solid fa-copy text-base"></i>
+                            <span>複製分享文字 (IG / 微信)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 px-4 text-xs text-warm-700 border-t border-warm-200/60 bg-warm-50/50">
+        <p>「不怕囉唆 &amp; 最怕生疏」價值觀教育遊戲 · 統計數據參考：香港特別行政區政府統計處、世界衛生組織 (WHO)、聯合國人口司、世界銀行</p>
+    </footer>
+
+    <!-- ================= MODAL 1: CHARACTER DETAIL INSPECTOR ================= -->
+    <div id="modal-char-detail" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-warm-50 rounded-3xl max-w-md w-full p-6 border-2 border-warm-300 shadow-2xl fade-in">
+            <div class="flex items-center justify-between border-b border-warm-200 pb-3 mb-4">
+                <h3 id="modal-char-title" class="font-serif font-bold text-lg text-warm-900">人物詳細檔案</h3>
+                <button onclick="closeModal('modal-char-detail')" class="w-8 h-8 rounded-full bg-warm-200 text-warm-800 flex items-center justify-center hover:bg-warm-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modal-char-body" class="space-y-2.5 text-xs sm:text-sm text-warm-800"></div>
+            <div class="mt-5 text-right">
+                <button onclick="closeModal('modal-char-detail')" class="px-5 py-2 rounded-xl bg-warm-600 text-white text-xs font-bold hover:bg-warm-700">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: DEMOGRAPHIC DATA REFERENCE ================= -->
+    <div id="modal-stats-info" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-warm-50 rounded-3xl max-w-2xl w-full p-6 border-2 border-warm-300 shadow-2xl max-h-[85vh] overflow-y-auto fade-in">
+            <div class="flex items-center justify-between border-b border-warm-200 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-globe text-jade-600 text-xl"></i>
+                    <h3 class="font-serif font-bold text-lg text-warm-900">全球及香港人口統計資料與遊戲設計依據</h3>
+                </div>
+                <button onclick="closeModal('modal-stats-info')" class="w-8 h-8 rounded-full bg-warm-200 text-warm-800 flex items-center justify-center hover:bg-warm-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-xs sm:text-sm text-warm-800 leading-relaxed">
+                <div class="p-3.5 rounded-2xl bg-white border border-warm-200">
+                    <h4 class="font-bold text-warm-900 mb-1">1. 香港政府統計處（Census and Statistics Department）</h4>
+                    <p>香港人口持續高齡化，出生時平均預期壽命男性約 82.5 歲、女性約 87.9 歲，整體中位指標約為 <strong>85 歲</strong>（即本遊戲設定之人生終點）。此外，65歲及以上長者佔總人口比例預計將於未來十多年上升至超過 30%，超過七成長者患有一種或以上長期病患（如高血壓、糖尿病、關節退化）。</p>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-white border border-warm-200">
+                    <h4 class="font-bold text-warm-900 mb-1">2. 世界衛生組織（WHO）健康老化報告</h4>
+                    <p>世衛指出，長者隨年齡增長會面對視力（老花、白內障）、聽力（老年性重聽）、行動能力及短期記憶退化。許多被年輕一代視為「囉唆、重複提問、講話大聲」的行為，實質上是長者因<strong>感官退化與缺乏安全感</strong>而產生的自然反應。</p>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-white border border-warm-200">
+                    <h4 class="font-bold text-warm-900 mb-1">3. 聯合國（UN）及世界銀行（World Bank）跨代家庭趨勢</h4>
+                    <p>全球生育率下降（香港總和生育率處於約0.8-0.9的低水平），家庭結構趨向核心化及跨地域居住。不少長輩與兒孫分開居住甚至身處海外，需依賴長途電話或視像通話維繫感情，「科技溝通信任」與「主動問候」成為當代孝親的關鍵課題。</p>
+                </div>
+            </div>
+            <div class="mt-5 text-right">
+                <button onclick="closeModal('modal-stats-info')" class="px-5 py-2 rounded-xl bg-jade-600 text-white text-xs font-bold hover:bg-jade-700">明白</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification (No alert() used) -->
+    <div id="toast-msg" class="fixed bottom-5 right-5 z-50 hidden bg-warm-900 text-white px-4 py-3 rounded-2xl shadow-xl text-xs sm:text-sm flex items-center gap-2.5 fade-in">
+        <i class="fa-solid fa-circle-check text-jade-400"></i>
+        <span id="toast-text"></span>
+    </div>
+
+    <!-- ================= JAVASCRIPT GAME ENGINE ================= -->
+    <script>
+        /********************************************************************
+         * 1. SOUND SYSTEM (Tone.js)
+         ********************************************************************/
+        let soundEnabled = true;
+        let synth = null;
+
+        function initAudio() {
+            if (!synth && typeof Tone !== 'undefined') {
+                synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.02, decay: 0.1, sustain: 0.1, release: 0.4 }
+                }).toDestination();
+                synth.volume.value = -10;
+            }
+        }
+
+        function playTone(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!synth) return;
+                const now = Tone.now();
+                if (type === 'click') {
+                    synth.triggerAttackRelease(["C5"], "16n", now);
+                } else if (type === 'event') {
+                    synth.triggerAttackRelease(["E4", "G4", "C5"], "8n", now);
+                } else if (type === 'warm') {
+                    synth.triggerAttackRelease(["C4", "E4", "G4", "B4"], "8n", now);
+                } else if (type === 'sad') {
+                    synth.triggerAttackRelease(["A3", "C4", "E4"], "4n", now);
+                }
+            } catch (e) {
+                // Ignore audio context restrictions if not yet interacted
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('icon-sound');
+            icon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+            showToast(soundEnabled ? '已開啟溫馨音效' : '已切換為靜音模式');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3200);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        /********************************************************************
+         * 2. DEMOGRAPHIC & RANDOMIZATION POOLS
+         ********************************************************************/
+        const RANDOM_POOLS = {
+            genders: ['男', '女'],
+            educations: [
+                '大學學士（本地資助大學）',
+                '碩士或以上學歷（專業深造）',
+                '高級文憑 / 副學士（應用專科）',
+                '中學文憑（DSE畢業後投身社會）',
+                '海外留學學士'
+            ],
+            playerJobs: [
+                '註冊護士（醫療衛生界）',
+                '中學教師（教育界）',
+                '軟件工程師（創新科技界）',
+                '會計師（金融及商業服務）',
+                '社工（社會福利界）',
+                '物流及貿易主管（進出口貿易）',
+                '室內設計師（建築及工程）',
+                '公務員（公共行政）'
+            ],
+            parentJobs: [
+                '茶餐廳東主', '巴士車長', '小學教師', '銀行文員',
+                '水電技工', '會計主任', '醫護助理', '公務員', '全職家庭照顧者'
+            ],
+            maritalStatuses: [
+                { label: '已婚（感情穩定）', weight: 65 },
+                { label: '離異（各自生活）', weight: 22 },
+                { label: '其中一位已過身（單親撫養）', weight: 13 }
+            ],
+            gpEducations: [
+                '戰後私塾 / 小學程度（早年輟學養家）',
+                '小學畢業（六十年代工廠學徒出身）',
+                '初中程度（夜校半工讀進修）',
+                '師範專科 / 中學畢業（當年知識分子）'
+            ],
+            gpPastJobs: [
+                '製衣廠車衣女工 / 紡織技工',
+                '傳統酒樓點心師傅',
+                '碼頭及航運苦力工人',
+                '街市鮮魚蔬果檔檔主',
+                '五金塑膠廠師傅',
+                '小學教職員',
+                '屋邨士多老闆'
+            ],
+            economies: [
+                '依靠高齡津貼（生果金）及長者生活津貼，生活節儉',
+                '有少量昔日積蓄及子女家用，收支平衡',
+                '擁有自住物業及退休積蓄，經濟小康穩健',
+                '依靠強積金/退休金及儲蓄，精打細算'
+            ],
+            gpPersonalities: [
+                { name: '熱心愛叮嚀（極怕你凍親餓親）', nagLevel: '高', tag: '極度關心' },
+                { name: '傳統威嚴但刀子嘴豆腐心', nagLevel: '中高', tag: '愛之深責之切' },
+                { name: '溫和慈祥、喜歡講舊時故事', nagLevel: '中', tag: '愛憶當年' },
+                { name: '容易焦慮擔心、渴望兒孫陪伴', nagLevel: '高', tag: '怕被遺忘' }
+            ],
+            gcPersonalities: [
+                { name: '機不離手、說話直接但內心善良', tendency: '嫌長輩重複囉唆' },
+                { name: '學業工作繁忙、步伐急促', tendency: '回覆簡短匆忙' },
+                { name: '活潑貪玩、好奇心強但耐性較少', tendency: '容易分心' },
+                { name: '乖巧敏感、重視個人空間', tendency: '怕長輩過度干預' }
+            ],
+            gcNamesMale: ['子軒', '俊傑', '梓朗', '宇軒', '浩然', '卓霖'],
+            gcNamesFemale: ['芷晴', '心怡', '曉彤', '凱琳', '詩雅', '樂瑤']
+        };
+
+        const DEMOGRAPHIC_TICKER_FACTS = [
+            "【香港政府統計處】香港男性平均預期壽命約82.5歲，女性約87.9歲，位居世界最長壽地區之列。",
+            "【世界衛生組織 WHO】全球60歲以上人口中，超過25%受不同程度聽力退化影響，導致長輩說話音量不自覺變大。",
+            "【聯合國人口報告】推算2046年香港每3個人就有1位是65歲或以上長者，跨代共融是未來社會核心。",
+            "【世界銀行數據】香港總和生育率低於1.0，每個孫輩往往集多位長輩的關注於一身，叮嚀自然更頻密。",
+            "【長者健康統計】超過75%的75歲以上長者患有一種或以上慢性病，他們的「囉唆」往往源於對健康退化的不安。"
+        ];
+
+        // Rotate ticker facts
+        setInterval(() => {
+            const el = document.getElementById('header-stat-ticker');
+            if (el) {
+                const randomFact = DEMOGRAPHIC_TICKER_FACTS[Math.floor(Math.random() * DEMOGRAPHIC_TICKER_FACTS.length)];
+                el.textContent = randomFact;
+            }
+        }, 7000);
+
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function pickWeighted(items) {
+            const total = items.reduce((acc, item) => acc + item.weight, 0);
+            let r = Math.random() * total;
+            for (const item of items) {
+                if (r < item.weight) return item.label;
+                r -= item.weight;
+            }
+            return items[0].label;
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /********************************************************************
+         * 3. GAME STATE OBJECT
+         ********************************************************************/
+        let gameState = {
+            playerName: '',
+            gender: '',
+            education: '',
+            adultJob: '',
+            family: {
+                fatherJob: '',
+                motherJob: '',
+                maritalStatus: '',
+                siblingsCount: 0
+            },
+            grandparents: [], // 1 to 4 members
+            childrenInfo: {
+                count: 0,
+                jobs: [],
+                maritalStatus: ''
+            },
+            grandchildren: [], // 1 to 4 members
+            currentAge: 0,
+            isPaused: false,
+            speedMultiplier: 1, // 1x, 2x
+            empathyScore: 70,
+            activeDialogue: null,
+            dialogueQueue: [], // Queue to hold multiple events at the same age or multi-stage events
+            gpInteractionCount: 0,
+            gcInteractionCount: 0,
+            triggeredEvents: new Set(),
+            logs: []
+        };
+
+        let simulationTimer = null;
+
+        /********************************************************************
+         * 4. GENERATE RANDOMIZED FAMILY & 4-GENERATION PROFILE
+         ********************************************************************/
+        function generateInitialProfile() {
+            const nameInput = document.getElementById('player-name-input').value.trim();
+            const errEl = document.getElementById('name-error-msg');
+            if (!nameInput) {
+                errEl.classList.remove('hidden');
+                return;
+            }
+            errEl.classList.add('hidden');
+            playTone('click');
+
+            gameState.playerName = nameInput;
+            buildRandomData();
+            renderProfileOverview();
+
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-profile').classList.remove('hidden');
+        }
+
+        function rerollProfile() {
+            playTone('click');
+            buildRandomData();
+            renderProfileOverview();
+            showToast('已重新隨機生成你的家庭、長輩及兒孫配置！');
+        }
+
+        function buildRandomData() {
+            gameState.gender = pickRandom(RANDOM_POOLS.genders);
+            gameState.education = pickRandom(RANDOM_POOLS.educations);
+            gameState.adultJob = pickRandom(RANDOM_POOLS.playerJobs);
+
+            // Parents & Siblings
+            gameState.family = {
+                fatherJob: pickRandom(RANDOM_POOLS.parentJobs),
+                motherJob: pickRandom(RANDOM_POOLS.parentJobs),
+                maritalStatus: pickWeighted(RANDOM_POOLS.maritalStatuses),
+                siblingsCount: randInt(0, 3)
+            };
+
+            // Grandparents (1 - 4), weighted towards 2-4 so multi-grandparent interactions happen frequently
+            const allGpRoles = [
+                { role: '爺爺', side: '父系', gender: '男', avatar: '👴' },
+                { role: '嫲嫲', side: '父系', gender: '女', avatar: '👵' },
+                { role: '公公', side: '母系', gender: '男', avatar: '🧓' },
+                { role: '婆婆', side: '母系', gender: '女', avatar: '👵' }
+            ];
+            const gpCount = pickRandom([1, 2, 3, 3, 4, 4]);
+            const shuffledRoles = [...allGpRoles].sort(() => Math.random() - 0.5).slice(0, gpCount);
+
+            // Stagger player Ages at which grandparents pass away so player has plenty of time to interact across childhood, youth, and adulthood
+            const deathPlayerAgeSlots = [randInt(14, 19), randInt(23, 28), randInt(32, 37), randInt(40, 46)];
+
+            gameState.grandparents = shuffledRoles.map((r, idx) => {
+                const initialAge = randInt(56, 68);
+                const playerAgeAtPass = deathPlayerAgeSlots[idx];
+                const lifespan = initialAge + playerAgeAtPass; // Hidden from UI, used for story progression
+                const inHK = Math.random() < 0.72;
+                const liveTogether = inHK ? (Math.random() < 0.45) : false;
+                const overseasPlace = pickRandom(['加拿大溫哥華', '英國倫敦', '澳洲悉尼', '廣東佛山家鄉']);
+
+                const health = {
+                    mobility: pickRandom(['行動自如', '行路較慢（偶爾膝痛）', '需用拐杖助行']),
+                    vision: pickRandom(['視力尚可', '有老花（看手機字要放大）', '早期白內障（視物模糊）']),
+                    hearing: pickRandom(['聽力正常', '輕微重聽（講話較大聲）', '需戴助聽器（怕嘈雜環境）']),
+                    expression: pickRandom(['表達清晰但愛重複往事', '語速較慢、偶爾忘記詞語', '鄉音較重、習慣反覆叮嚀']),
+                    comprehension: pickRandom(['理解力佳', '對新科技概念較慢理解', '需要別人放慢語速解釋']),
+                    chronicIllness: pickRandom(['高血壓及膽固醇偏高（需定時服藥）', '糖尿病（需戒口控糖）', '退化性關節炎（轉天氣會痛）', '身體大致硬朗（無嚴重長期病）'])
+                };
+
+                const pers = pickRandom(RANDOM_POOLS.gpPersonalities);
+
+                return {
+                    id: 'gp_' + idx,
+                    role: r.role,
+                    avatar: r.avatar,
+                    gender: r.gender,
+                    education: pickRandom(RANDOM_POOLS.gpEducations),
+                    pastJob: pickRandom(RANDOM_POOLS.gpPastJobs),
+                    health: health,
+                    economy: pickRandom(RANDOM_POOLS.economies),
+                    personality: pers.name,
+                    nagStyle: pers.tag,
+                    initialAge: initialAge,
+                    currentAge: initialAge,
+                    lifespan: lifespan, // Hidden!
+                    playerAgeAtPass: playerAgeAtPass,
+                    inHK: inHK,
+                    locationDesc: inHK
+                        ? (liveTogether ? '在香港居住（與你同住一屋簷下）' : '在香港居住（不同住，週末飲茶探訪）')
+                        : `不在港居住（定居${overseasPlace}，定期要求長途電話或視像聯絡）`,
+                    liveTogether: liveTogether,
+                    isAlive: true,
+                    closeness: 72,
+                    relationshipState: '親近溫暖',
+                    interactionHistory: []
+                };
+            });
+
+            // Future Children (Player's kids)
+            const childrenCount = randInt(1, 3);
+            const childJobs = [];
+            for (let i = 0; i < childrenCount; i++) {
+                childJobs.push(pickRandom(RANDOM_POOLS.playerJobs));
+            }
+            gameState.childrenInfo = {
+                count: childrenCount,
+                jobs: childJobs,
+                maritalStatus: pickWeighted(RANDOM_POOLS.maritalStatuses)
+            };
+
+            // Future Grandchildren (1 - 4), weighted so multiple grandchildren are common
+            const gcCount = pickRandom([1, 2, 3, 3, 4]);
+            const birthPlayerAges = [46, 49, 52, 55];
+            gameState.grandchildren = [];
+
+            for (let i = 0; i < gcCount; i++) {
+                const gcGender = pickRandom(RANDOM_POOLS.genders);
+                const gcName = gcGender === '男'
+                    ? pickRandom(RANDOM_POOLS.gcNamesMale) + (i > 0 ? '' : '')
+                    : pickRandom(RANDOM_POOLS.gcNamesFemale);
+                const inHK = Math.random() < 0.68;
+                const liveTogether = inHK ? (Math.random() < 0.35) : false;
+                const overseasCity = pickRandom(['英國留學及工作', '加拿大生活', '澳洲墨爾本', '新加坡發展']);
+                const pers = pickRandom(RANDOM_POOLS.gcPersonalities);
+
+                gameState.grandchildren.push({
+                    id: 'gc_' + i,
+                    name: `孫${gcGender === '男' ? '仔' : '女'}${gcName}`,
+                    shortName: gcName,
+                    gender: gcGender,
+                    avatar: gcGender === '男' ? '👦' : '👧',
+                    health: pickRandom(['健康活潑、精力充沛', '有輕微鼻敏感或氣管敏感', '經常捱夜睇螢幕、容易疲倦']),
+                    economy: pickRandom(['由父母悉心栽培，物質充裕', '半工讀自力更生，努力儲蓄', '家庭經濟穩定，衣食無憂']),
+                    personality: pers.name,
+                    tendency: pers.tendency,
+                    playerAgeAtBirth: birthPlayerAges[i],
+                    currentAge: 0,
+                    lifespan: randInt(82, 95), // Hidden!
+                    inHK: inHK,
+                    liveTogether: liveTogether,
+                    locationDesc: inHK
+                        ? (liveTogether ? '在港居住（三代同堂與你同住）' : '在港居住（分開居住，假日見面）')
+                        : `不在港居住（於${overseasCity}，需定期視像或長途電話聯絡）`,
+                    isBorn: false,
+                    closeness: 70,
+                    relationshipState: '融洽親近',
+                    interactionHistory: []
+                });
+            }
+        }
+
+        function renderProfileOverview() {
+            document.getElementById('prof-player-name').textContent = gameState.playerName;
+
+            // Player & Parents Details
+            const pDetails = document.getElementById('prof-player-details');
+            pDetails.innerHTML = `
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">性別：</span>
+                    <span class="font-bold">${gameState.gender}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">教育狀況：</span>
+                    <span class="font-bold text-right">${gameState.education}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">成年後職業：</span>
+                    <span class="font-bold text-right">${gameState.adultJob}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">父親 / 母親職業：</span>
+                    <span class="font-bold text-right">${gameState.family.fatherJob} / ${gameState.family.motherJob}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">父母婚姻狀況：</span>
+                    <span class="font-bold text-right">${gameState.family.maritalStatus}</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-warm-600">兄弟姊妹數目：</span>
+                    <span class="font-bold">${gameState.family.siblingsCount === 0 ? '獨生子女 (0位)' : gameState.family.siblingsCount + ' 位兄弟姊妹'}</span>
+                </div>
+            `;
+
+            // Future Children Details
+            const fOffspring = document.getElementById('prof-future-offspring');
+            fOffspring.innerHTML = `
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">你的子女數目：</span>
+                    <span class="font-bold">${gameState.childrenInfo.count} 位子女</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-warm-100">
+                    <span class="text-warm-600">子女成年職業：</span>
+                    <span class="font-bold text-right">${gameState.childrenInfo.jobs.join('、')}</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-warm-600">子女婚姻狀況：</span>
+                    <span class="font-bold text-right">${gameState.childrenInfo.maritalStatus}</span>
+                </div>
+            `;
+
+            // Grandparents Cards
+            document.getElementById('prof-gp-count-badge').textContent = `共 ${gameState.grandparents.length} 位健在長輩`;
+            const gpGrid = document.getElementById('prof-grandparents-grid');
+            gpGrid.innerHTML = gameState.grandparents.map(gp => `
+                <div class="bg-white rounded-2xl p-4 border border-warm-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl">${gp.avatar}</span>
+                                <div>
+                                    <h4 class="font-bold text-warm-900 text-sm">${gp.role}（你0歲時 ${gp.initialAge} 歲）</h4>
+                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">${gp.nagStyle}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="text-xs text-warm-800 space-y-1 mt-2">
+                            <li><strong>成長背景：</strong>${gp.education}｜昔日任職${gp.pastJob}</li>
+                            <li><strong>健康狀況：</strong>${gp.health.mobility}、${gp.health.vision}、${gp.health.hearing}</li>
+                            <li><strong>溝通與病歷：</strong>${gp.health.expression}｜${gp.health.chronicIllness}</li>
+                            <li><strong>經濟狀況：</strong>${gp.economy}</li>
+                            <li><strong>性格特質：</strong>${gp.personality}</li>
+                            <li class="text-jade-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${gp.locationDesc}</li>
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+
+            // Grandchildren Mini Cards
+            document.getElementById('prof-gc-count').textContent = gameState.grandchildren.length;
+            const gcGrid = document.getElementById('prof-grandchildren-grid');
+            gcGrid.innerHTML = gameState.grandchildren.map(gc => `
+                <div class="bg-jade-50/70 rounded-xl p-3 border border-jade-100 text-xs text-warm-900">
+                    <div class="flex items-center justify-between font-bold mb-1">
+                        <span>${gc.avatar} ${gc.name}（將於你${gc.playerAgeAtBirth}歲時出生）</span>
+                        <span class="text-[10px] bg-white px-2 py-0.5 rounded-full text-jade-700 border border-jade-200">${gc.tendency}</span>
+                    </div>
+                    <p class="text-[11px] text-warm-700">性格：${gc.personality}｜健康：${gc.health}</p>
+                    <p class="text-[11px] text-jade-700 mt-0.5"><i class="fa-solid fa-house-Signal mr-1"></i>${gc.locationDesc}</p>
+                </div>
+            `).join('');
+        }
+
+        /********************************************************************
+         * 5. LIFE STAGE DEFINITIONS & DIALOGUE GENERATOR
+         ********************************************************************/
+        function getLifeStageInfo(age) {
+            if (age <= 2) return { name: '嬰兒期 (0-2歲)', avatar: '👶', role: '孫輩' };
+            if (age <= 5) return { name: '幼兒期 (3-5歲)', avatar: '🧒', role: '孫輩' };
+            if (age <= 11) return { name: '兒童期 (6-11歲)', avatar: '🎒', role: '孫輩' };
+            if (age <= 17) return { name: '少年期 (12-17歲)', avatar: '🧑‍🎓', role: '孫輩' };
+            if (age <= 24) return { name: '青年期 (18-24歲)', avatar: '🎓', role: '孫輩' };
+            if (age <= 44) return { name: '成年期 (25-44歲)', avatar: '💼', role: '孫輩及父母' };
+            if (age <= 64) return { name: '中年期 (45-64歲)', avatar: '🧔', role: '晉升為祖輩（爺爺/嫲嫲/公公/婆婆）' };
+            return { name: '老年期 (65-85歲)', avatar: '🧓', role: '高齡長輩（祖輩）' };
+        }
+
+        function getElderAgeBracket(elderAge) {
+            if (elderAge < 70) return '初老期（60-69歲，精神尚佳、特別愛操心大小事）';
+            if (elderAge < 80) return '中老期（70-79歲，視聽力退化明顯、說話重複、渴望陪伴）';
+            return '高齡期（80歲以上，體弱步緩、珍惜每一次見面與通話）';
+        }
+
+        /********************************************************************
+         * 5B. RICH SINGLE & MULTI-ELDER / MULTI-GRANDCHILD DIALOGUE GENERATORS
+         ********************************************************************/
+
+        // 1. MULTI-GRANDPARENT SIMULTANEOUS INTERACTION (When 2+ grandparents are alive)
+        function createMultiGrandparentDialogue(gps, playerAge, variantKey) {
+            const namesJoined = gps.map(g => g.role).join('、');
+            const avatarsJoined = gps.map(g => g.avatar).join('');
+            const hasOverseas = gps.some(g => !g.inHK);
+            const locationBadge = hasOverseas ? '香港聚會 + 海外群組視像連線' : '多位長輩齊聚一堂';
+
+            let category = '多位長輩同時叮嚀';
+            let bubbles = [];
+            let hint = '';
+            let choices = [];
+
+            if (playerAge <= 5) {
+                category = '多位長輩圍住寵愛與叮嚀';
+                bubbles = gps.map((gp, idx) => {
+                    const lines = [
+                        `「哎呀，等${gp.role}抱下先！${gameState.playerName}面珠墩好肉地呀，不過隻手仔好似有啲涼，快啲加件背心啦！」`,
+                        `「係呀係呀！${gp.role}特登煲咗粥仔同買咗生果，細路仔最緊要食飽啲、唔好偏食呀！」`,
+                        `「我喺${gp.inHK ? '屋企' : '外國視像'}望住${gameState.playerName}學行學講嘢，真係聰明伶俐，記住唔好跑咁快跌親呀！」`,
+                        `「乖孫，叫聲${gp.role}聽下先！我哋幾個老人家見到你笑就最開心㗎喇！」`
+                    ];
+                    return {
+                        speaker: `${gp.avatar} ${gp.role}（${gp.currentAge}歲 · ${gp.nagStyle}）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `現在有 ${gps.length} 位長輩（${namesJoined}）同時圍著年幼的你一人一句叮嚀！雖然七嘴八舌十分熱鬧甚至有點囉唆，但全都是對你的疼愛。`;
+                choices = [
+                    {
+                        text: `🥰 開心地逐個叫一聲「${namesJoined}」，張開小手讓他們抱抱並乖乖吃東西`,
+                        deltaClose: +11,
+                        deltaEmp: +9,
+                        nextState: '親近溫暖',
+                        reply: `${namesJoined}全場哄堂大笑，爭住誇獎你係全宇宙最乖巧識氹人嘅乖孫！`
+                    },
+                    {
+                        text: `😶 被幾位長輩圍住覺得太嘈，只顧低頭玩玩具唔出聲`,
+                        deltaClose: -2,
+                        deltaEmp: 0,
+                        nextState: '更囉唆緊張',
+                        reply: `${namesJoined}見你唔應人，反而更加緊張地一人一句問你係咪唔舒服、係咪肚餓。`
+                    },
+                    {
+                        text: `😭 大聲哭鬧推開他們：「好嘈呀！唔好全部圍住我呀！」`,
+                        deltaClose: -8,
+                        deltaEmp: -6,
+                        nextState: '時常責備',
+                        reply: `長輩們頓時手足無措，嘆氣怪責你脾氣大。`
+                    }
+                ];
+            } else if (playerAge <= 14) {
+                category = '家庭聚會：長輩輪流夾餸與學業叮囑';
+                bubbles = gps.map((gp, idx) => {
+                    const lines = [
+                        `「${gameState.playerName}，瘦咗咁多嘅？快啲食多兩舊雞同魚啦，${gp.role}夾畀你，最緊要飲多啲湯！」`,
+                        `「除咗食飯，讀書都要俾心機呀！${gp.role}以前（${gp.education}）想讀書都冇得讀，你而家幾幸福，唔好成日掛住睇電視打機呀！」`,
+                        `「我耳仔（${gp.health.hearing}）聽唔清楚你講咩，你大聲啲應我哋啦！放學記住早啲返屋企，唔好周街走呀！」`,
+                        `「轉天氣喇，我風濕關節痛（${gp.health.chronicIllness}）就知會凍，你返學書包一定要放件風褸呀！」`
+                    ];
+                    return {
+                        speaker: `${gp.avatar} ${gp.role}（${gp.currentAge}歲 · ${gp.health.hearing}）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `多位長輩（${namesJoined}）一齊同你講嘢，你一言我一語，碗裡的餸菜堆得像小山一樣高。`;
+                choices = [
+                    {
+                        text: `🍚 笑住雙手接過長輩夾的餸，逐一回答${namesJoined}的問題並幫他們斟茶`,
+                        deltaClose: +13,
+                        deltaEmp: +11,
+                        nextState: '親近溫暖',
+                        reply: `${namesJoined}見你咁有禮貌又肯聽長輩講嘢，個個都笑逐顏開！`
+                    },
+                    {
+                        text: `😅 苦著臉說：「得啦得啦，個碗裝唔落喇，你哋幾個人一齊講我聽唔切呀！」`,
+                        deltaClose: -3,
+                        deltaEmp: -1,
+                        nextState: '更囉唆緊張',
+                        reply: `${namesJoined}繼續七嘴八舌：「我哋都係錫你先至講啫，你食晒先好走呀！」`
+                    },
+                    {
+                        text: `😠 放低筷子發脾氣：「每次同你哋食飯都好似審犯咁，好煩呀！」`,
+                        deltaClose: -12,
+                        deltaEmp: -10,
+                        nextState: '漸趨生疏',
+                        reply: `飯桌瞬間安靜下來，幾位長輩面面相覷，神情黯然。`
+                    }
+                ];
+            } else if (playerAge <= 24) {
+                category = '多位長輩同時求助與連環追問';
+                bubbles = gps.map((gp, idx) => {
+                    const lines = [
+                        `「${gameState.playerName}呀，我隻眼（${gp.health.vision}）睇唔清部手機，點解個WhatsApp無端端冇聲嘅？你幫我整整佢先啦！」`,
+                        `「仲有我呀！我張醫療券同覆診紙唔知擺咗去邊，我（${gp.health.mobility}）去診所好論盡，你幾時得閒陪我去呀？」`,
+                        `「係呢，你而家讀書同出嚟做嘢點呀？拍拖未呀？幾時帶朋友仔畀我哋幾個老人家見下呀？唔好成日夜媽媽先返屋企呀！」`,
+                        `「我喺${gp.inHK ? '屋企' : '外國'}成日掛住你，你記住多啲喺家庭群組發相畀我哋睇啦！」`
+                    ];
+                    return {
+                        speaker: `${gp.avatar} ${gp.role}（${gp.currentAge}歲 · ${getElderAgeBracket(gp.currentAge).split('（')[0]}）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `當幾位長輩同時步入高齡（${gps.map(g => g.currentAge + '歲').join('、')}），他們的健康退化與科技求助往往同時湧現。`;
+                choices = [
+                    {
+                        text: `💖 深呼吸保持耐性，坐低逐一幫${namesJoined}調校手機、記低覆診日期，再溫柔回答近況`,
+                        deltaClose: +15,
+                        deltaEmp: +14,
+                        nextState: '親近溫暖',
+                        reply: `${namesJoined}異口同聲讚嘆：「好彩有乖孫喺度咋！你咁有耐性教我哋，我哋真係好安慰！」`
+                    },
+                    {
+                        text: `⏳ 只快速幫其中一位整好手機就匆匆離開：「我有約趕時間呀，其他嘢下次先講啦！」`,
+                        deltaClose: -4,
+                        deltaEmp: -3,
+                        nextState: '更囉唆緊張',
+                        reply: `長輩們在身後追問：「咁幾時先有下次呀？你成日都咁忙嘅...」`
+                    },
+                    {
+                        text: `🙄 不耐煩地抱怨：「你哋幾個長輩唔好一齊煩我得唔得？我已經好大壓力喇！」`,
+                        deltaClose: -14,
+                        deltaEmp: -12,
+                        nextState: '漸趨生疏',
+                        reply: `${namesJoined}聽後不敢再出聲，默默把手機和覆診紙收起來，氣氛變得十分生疏。`
+                    }
+                ];
+            } else {
+                category = '高齡長輩們的共同心願';
+                bubbles = gps.map((gp, idx) => {
+                    const lines = [
+                        `「${gameState.playerName}，我哋幾個都一把年紀（${gp.currentAge}歲）喇，行得走得埋一齊食飯嘅日子真係見一次少一次...」`,
+                        `「你做${gameState.adultJob}仲要照顧屋企固然忙，但千祈唔好捱壞身子，我哋雖然囉唆，但最怕係同你生疏咗呀！」`
+                    ];
+                    return {
+                        speaker: `${gp.avatar} ${gp.role}（${gp.currentAge}歲）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `能同時擁有幾位高齡長輩健在是極難得的福分。`;
+                choices = [
+                    {
+                        text: `🫂 主動為${namesJoined}影一張大合照並緊握他們的手：「無論幾忙，你哋永遠係我最錫嘅長輩！」`,
+                        deltaClose: +16,
+                        deltaEmp: +15,
+                        nextState: '親近溫暖',
+                        reply: `這張溫暖的跨代合照，成為家族中最珍貴的傳家寶。`
+                    },
+                    {
+                        text: `💼 點頭應承但很快便忙於看工作訊息：「知道喇，大家保重身體。」`,
+                        deltaClose: -3,
+                        deltaEmp: -2,
+                        nextState: '漸趨生疏',
+                        reply: `長輩們看著你忙碌的身影，既心疼又無奈。`
+                    }
+                ];
+            }
+
+            return {
+                mode: 'grandparent_multi',
+                targets: gps,
+                speakerName: `${namesJoined}（${gps.length}位長輩同時互動）`,
+                avatar: avatarsJoined,
+                category: category,
+                locationBadge: locationBadge,
+                healthNote: `長輩年齡：${gps.map(g => `${g.role}${g.currentAge}歲`).join('、')}`,
+                bubbles: bubbles,
+                hint: hint,
+                choices: choices
+            };
+        }
+
+        // 2. SINGLE GRANDPARENT INTERACTION (Varied by Player Stage + Elder Age + Topic)
+        function createGrandparentDialogue(gp, playerAge, topicVariant = 0) {
+            const isRemote = !gp.inHK;
+            const commPrefix = isRemote
+                ? `📱【跨國長途電話 / 視像通話】${gp.role}隔著螢幕對你說：`
+                : (gp.liveTogether ? `🏠【同住屋企日常】${gp.role}走到你身邊對你說：` : `🫖【探訪與飲茶相聚】${gp.role}握著你的手對你說：`);
+
+            const elderBracket = getElderAgeBracket(gp.currentAge);
+            let category = '';
+            let message = '';
+            let hint = '';
+            let choices = [];
+
+            if (playerAge <= 5) {
+                if (topicVariant % 2 === 0) {
+                    category = '關心添衣與讚賞';
+                    message = `${commPrefix}「哎呀，我哋${gameState.playerName}大個得好快呀！今日吹北風轉涼呀，快啲著多件背心啦，唔好冷親個肚仔呀！食咗飯未呀？乖孫最精靈㗎啦！」`;
+                } else {
+                    category = '擔心跌親與飲食囉唆';
+                    message = `${commPrefix}「${gameState.playerName}，行路慢啲呀，地下滑呀！嚟食啖${gp.role}整嘅蒸水蛋啦，唔好成日食零食呀，乖唔乖呀？」`;
+                }
+                hint = `${gp.role}現處於${elderBracket}（${gp.health.vision}）。長輩反覆叮囑添衣吃飯，是傳統華人家庭最直接的愛。`;
+                choices = [
+                    {
+                        text: `😊 甜甜地笑著抱住${gp.role}：「多謝${gp.role}！我即刻著衫食飯，我最鍾意你！」`,
+                        deltaClose: +10,
+                        deltaEmp: +8,
+                        nextState: '親近溫暖',
+                        reply: `${gp.role}笑到見牙唔見眼：「真係乖孫！${gp.role}錫晒你！」`
+                    },
+                    {
+                        text: `😐 點點頭但急著跑去玩玩具：「知道啦，我去玩先喇！」`,
+                        deltaClose: +1,
+                        deltaEmp: +1,
+                        nextState: '更囉唆緊張',
+                        reply: `${gp.role}在後面追著叮囑：「睇路呀！唔好跌親呀！」`
+                    },
+                    {
+                        text: `😣 扭計推開：「唔制呀！好煩呀，你唔好成日管住我啦！」`,
+                        deltaClose: -8,
+                        deltaEmp: -6,
+                        nextState: '時常責備',
+                        reply: `${gp.role}嘆了口氣：「呢個細路仔咁拗頸嘅，凍親你就知味道！」`
+                    }
+                ];
+            } else if (playerAge <= 11) {
+                if (topicVariant % 2 === 0) {
+                    category = '問候學業與護眼叮嚀';
+                    message = `${commPrefix}「${gameState.playerName}，返學讀書辛唔辛苦呀？我見你成日對住部電視同遊戲機，隻眼會壞㗎！記住坐直個人、飲多啲水、唔好食咁多熱氣嘢呀！」`;
+                } else {
+                    category = '講述昔日奮鬥故事';
+                    message = `${commPrefix}「${gameState.playerName}，我以前做『${gp.pastJob}』嗰陣好辛苦㗎，朝早五點就要起身開工！所以我成日囉唆你要珍惜讀書機會、唔好浪費食物，你明唔明白${gp.role}苦心呀？」`;
+                }
+                hint = `${gp.role}現年 ${gp.currentAge} 歲（${gp.health.hearing}），說話音量較大，總愛重提當年往事來勉勵你。`;
+                choices = [
+                    {
+                        text: `💛 主動幫${gp.role}揼骨並留心傾聽：「知道啦${gp.role}！你以前真係好辛苦，我會俾心機讀書㗎！」`,
+                        deltaClose: +12,
+                        deltaEmp: +10,
+                        nextState: '親近溫暖',
+                        reply: `${gp.role}感動得連聲稱讚：「我個孫真係懂事，識得體諒老人家！」`
+                    },
+                    {
+                        text: `😅 敷衍地應一聲：「得啦得啦，呢個故事你講咗十幾次喇，我識背啦。」`,
+                        deltaClose: -3,
+                        deltaEmp: -2,
+                        nextState: '更囉唆緊張',
+                        reply: `${gp.role}皺起眉頭：「我唔講多幾次你又左耳入右耳出，我擔心你咋！」`
+                    },
+                    {
+                        text: `😠 掩住耳朵走入房：「你好煩呀！把聲又大又囉唆，唔想聽你講古仔！」`,
+                        deltaClose: -12,
+                        deltaEmp: -10,
+                        nextState: '漸趨生疏',
+                        reply: `${gp.role}愣在原地，眼神落寞地低聲說：「唉，我耳仔唔靈光先講大聲啲啫...」`
+                    }
+                ];
+            } else if (playerAge <= 17) {
+                if (topicVariant % 2 === 0) {
+                    category = '擔心夜歸與手機爭執';
+                    message = `${commPrefix}「${gameState.playerName}，點解最近放學咁夜先返？成日掛住同朋友出街、篤手機，同我講兩句就望住個電話！我雖然老啫，但都係緊張你安全呀！」`;
+                } else {
+                    category = '長輩身體痛症與掛念';
+                    message = `${commPrefix}「${gameState.playerName}，最近天氣轉冷，我個『${gp.health.chronicIllness}』又發作，行路又（${gp.health.mobility}）。見你讀中學咁忙，我都唔敢大聲叫你，怕阻住你溫書...」`;
+                }
+                hint = `步入青春期的你渴望自由，但 ${gp.currentAge} 歲的${gp.role}正經歷明顯的身體機能退化，內心十分害怕被成長中的孫兒冷落。`;
+                choices = [
+                    {
+                        text: `🤝 放下手機，主動替${gp.role}搽藥油及分享校園趣事：「對唔住呀${gp.role}，等我陪你傾下偈、幫你捽下痛處啦！」`,
+                        deltaClose: +14,
+                        deltaEmp: +12,
+                        nextState: '親近溫暖',
+                        reply: `${gp.role}欣慰地笑著：「有你幫我搽藥油同我傾偈，我全身都唔痛啦！」`
+                    },
+                    {
+                        text: `😶 低頭繼續按手機：「得啦，我有分數㗎啦，我自己識搞掂。」`,
+                        deltaClose: -6,
+                        deltaEmp: -5,
+                        nextState: '漸趨生疏',
+                        reply: `${gp.role}欲言又止，默默轉身走開，彼此之間的話題越來越少。`
+                    },
+                    {
+                        text: `💢 不耐煩地頂撞：「時代唔同咗啦！你思想咁守舊，唔好再管我私隱得唔得？」`,
+                        deltaClose: -15,
+                        deltaEmp: -12,
+                        nextState: '時常責備',
+                        reply: `${gp.role}氣得手微微顫抖：「我辛辛苦苦睇住你大，你而家嫌棄老人家！」`
+                    }
+                ];
+            } else if (playerAge <= 24) {
+                if (topicVariant % 2 === 0) {
+                    category = '數碼鴻溝與視聽退化求助';
+                    message = `${commPrefix}「${gameState.playerName}呀... 唔好意思阻你少少時間，我部電話彈咗啲英文字出嚟，張醫院覆診紙啲字又細，我（${gp.health.vision}）睇唔清楚，個心好慌呀，你可唔可以教下我？」`;
+                } else {
+                    category = '前途關心與理財叮嚀';
+                    message = `${commPrefix}「${gameState.playerName}，你而家讀『${gameState.education}』快要投身社會喇。我靠『${gp.economy.split('，')[0]}』儲落少少利是錢想塞畀你買件見工衫，出面做嘢記住要老實、唔好捱壞呀！」`;
+                }
+                hint = `面對數碼時代與高齡退化，${gp.role}（${gp.currentAge}歲）向你求助或塞利是給你時，其實充滿了小心翼翼的愛。`;
+                choices = [
+                    {
+                        text: `💖 溫柔地坐下來，幫${gp.role}調大手機字體、寫下清晰便條，並擁抱感謝長輩的疼愛`,
+                        deltaClose: +16,
+                        deltaEmp: +15,
+                        nextState: '親近溫暖',
+                        reply: `${gp.role}眼眶泛紅：「好彩有你咋，我仲驚阻住你後生仔時間，你真係我嘅定心丸！」`
+                    },
+                    {
+                        text: `⏳ 匆匆忙忙處理完：「搞掂啦，上次咪教過你囉，我趕住出門口先喇。」`,
+                        deltaClose: -2,
+                        deltaEmp: -3,
+                        nextState: '更囉唆緊張',
+                        reply: `${gp.role}不好意思地說：「我記性退化吖嘛，下次唔敢亂撳喇...」`
+                    },
+                    {
+                        text: `🙄 嘆氣抱怨：「咁簡單都唔識！我好忙㗎，你問返阿爸阿媽啦！」`,
+                        deltaClose: -14,
+                        deltaEmp: -12,
+                        nextState: '漸趨生疏',
+                        reply: `${gp.role}默默收起東西：「係我老懵懂阻住你，以後我都係唔好煩你喇。」`
+                    }
+                ];
+            } else {
+                category = '高齡晚年的不捨與叮嚀';
+                message = `${commPrefix}「${gameState.playerName}，你而家做${gameState.adultJob}工作咁忙，我已經 ${gp.currentAge} 歲，對腳（${gp.health.mobility}），耳仔又（${gp.health.hearing}）。我冇咩所求，只係想同你飲啖茶、聽下你把聲，唔知仲有幾多次機會...」`;
+                hint = `${gp.role}已年屆 ${gp.currentAge} 歲高齡。長輩年邁時的重複叮嚀，其實是倒數時光下的深深不捨。`;
+                choices = [
+                    {
+                        text: `🫂 緊緊握著${gp.role}佈滿皺紋的手：「無論工作幾忙，我每星期一定抽時間陪你，我最鍾意聽你同我傾偈！」`,
+                        deltaClose: +18,
+                        deltaEmp: +15,
+                        nextState: '親近溫暖',
+                        reply: `${gp.role}臉上綻放最安心的笑容：「有你呢句話，${gp.role}呢世人就無憾囉！」`
+                    },
+                    {
+                        text: `💼 轉帳少許心意金但匆匆離開：「我買咗補品畀你，不過公司仲有會開，下次再傾！」`,
+                        deltaClose: +1,
+                        deltaEmp: 0,
+                        nextState: '漸趨生疏',
+                        reply: `${gp.role}望著桌上的補品輕嘆：「我唔使要錢同補品，我其實只係想同你坐低食餐飯啫...」`
+                    },
+                    {
+                        text: `📱 推說工作太忙未能見面或接聽：「最近真係太忙喇，過時過節先再算啦。」`,
+                        deltaClose: -15,
+                        deltaEmp: -12,
+                        nextState: '漸趨生疏',
+                        reply: `電話那頭只剩下長長的沉默，彼此的距離在忙碌中變得越來越遠。`
+                    }
+                ];
+            }
+
+            return {
+                mode: 'grandparent',
+                target: gp,
+                speakerName: `${gp.role}（${gp.currentAge}歲）`,
+                avatar: gp.avatar,
+                category: category,
+                locationBadge: gp.inHK ? (gp.liveTogether ? '同住日常' : '香港探訪') : '海外視像/長途電話',
+                healthNote: `${elderBracket.split('（')[0]} · ${gp.health.mobility} · ${gp.health.vision} · ${gp.health.hearing}`,
+                bubbles: [
+                    { speaker: `${gp.avatar} ${gp.role}（${gp.currentAge}歲）`, text: message }
+                ],
+                hint: hint,
+                choices: choices
+            };
+        }
+
+        // 3. MULTI-GRANDCHILD SIMULTANEOUS INTERACTION (When 2+ grandchildren are born)
+        function createMultiGrandchildDialogue(gcs, playerAge) {
+            const namesJoined = gcs.map(g => g.name).join('、');
+            const avatarsJoined = gcs.map(g => g.avatar).join('');
+            const hasOverseas = gcs.some(g => !g.inHK);
+            const locNote = hasOverseas ? '香港屋企 + 海外跨國視像同框' : '兒孫滿堂週末聚會';
+
+            const avgGcAge = Math.round(gcs.reduce((s, g) => s + g.currentAge, 0) / gcs.length);
+            let category = '多位孫輩同時與你互動';
+            let bubbles = [];
+            let hint = '';
+            let choices = [];
+
+            if (avgGcAge <= 12) {
+                category = '兒孫滿堂：幾個孫兒同時嘈吵與偏食';
+                bubbles = gcs.map((gc, idx) => {
+                    const lines = [
+                        `「我唔想食菜呀！我想睇平板電腦卡通片呀！你唔好成日叫我著外套啦，好熱呀！」`,
+                        `「係囉！點解你成日問我哋做完功課未啫？我哋想食薯片同雪糕呀！」`,
+                        `「你講嘢好大聲呀，同埋呢個故事你上次已經講過畀我哋聽啦！」`,
+                        `「快啲同我哋玩啦，不過唔好再囉唆我哋執玩具住呀！」`
+                    ];
+                    return {
+                        speaker: `${gc.avatar} ${gc.name}（${gc.currentAge}歲 · ${gc.tendency}）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `你現年 ${playerAge} 歲，面對 ${gcs.length} 個活潑嘈吵的孫兒（${namesJoined}）同時扭計並嫌你囉唆，你終於切身體會到當年自己長輩的感受！`;
+                choices = [
+                    {
+                        text: `💕【溫柔引導與趣味互動】不發脾氣亦不死板說教，改用講故事比賽的方式哄${namesJoined}開心吃飯添衣`,
+                        deltaClose: +13,
+                        deltaEmp: +11,
+                        nextState: '融洽親近',
+                        gcReply: `${namesJoined}開心地圍住你爭住聽故事，仲乖乖把飯菜吃光：「你最錫我哋喇！」`
+                    },
+                    {
+                        text: `🗣️【開啟連珠炮發囉唆模式】對住幾個孫不斷重複叮嚀：「唔准睇螢幕！快啲食菜！著衫呀！聽唔聽到呀？」`,
+                        deltaClose: -5,
+                        deltaEmp: +4,
+                        nextState: '嫌你囉唆',
+                        gcReply: `${namesJoined}齊聲掩住耳朵大叫：「救命呀！真係好囉唆呀！」然後一哄而散跑開了。`
+                    },
+                    {
+                        text: `😠【板起臉孔大聲喝止】拍枱責罵幾個孫兒無規矩：「全部同我坐定定！再嘈就沒收晒啲玩具！」`,
+                        deltaClose: -12,
+                        deltaEmp: -6,
+                        nextState: '敬而遠之',
+                        gcReply: `幾個孫兒嚇得不敢出聲，氣氛變得十分僵硬，之後都躲在父母身後不敢親近你。`
+                    }
+                ];
+            } else {
+                category = '多位年輕孫輩機不離手與跨代溝通';
+                bubbles = gcs.map((gc, idx) => {
+                    const lines = [
+                        `「我哋放假好忙㗎，一陣仲要同朋友出去，食埋呢餐飯就要走先喇。」`,
+                        `「你部老人手機啲嘢我上次咪教過你囉，點解你成日都唔記得點撳㗎？」`,
+                        `「我喺${gc.inHK ? '香港返學返工' : '外國'}好多嘢忙緊，唔好成日喺群組催我哋覆訊息啦！」`,
+                        `「得啦得啦，知你關心我哋喇，不過你每次見面都問埋同一樣問題，好似錄音機咁呀！」`
+                    ];
+                    return {
+                        speaker: `${gc.avatar} ${gc.name}（${gc.currentAge}歲 · ${gc.personality}）`,
+                        text: lines[idx % lines.length]
+                    };
+                });
+                hint = `步入高齡（${playerAge}歲）的你，面對幾位長大成人的孫兒（${namesJoined}）同時忙於自己的世界並嫌你重複囉唆，你會如何回應？`;
+                choices = [
+                    {
+                        text: `🌟【同理體諒與真誠傾聽】微笑表示理解他們年輕人的忙碌，主動關心他們的興趣與壓力，不多加批判`,
+                        deltaClose: +15,
+                        deltaEmp: +14,
+                        nextState: '融洽親近',
+                        gcReply: `${namesJoined}感到被尊重，紛紛放下手機主動同你分享近況，仲一齊幫你解決手機疑難！`
+                    },
+                    {
+                        text: `📢【繼續逐個囉唆叮嚀】拉住他們不放：「我唔講邊個講呀？你哋後生唔識諗，我講多十次都係為你哋好！」`,
+                        deltaClose: -6,
+                        deltaEmp: +4,
+                        nextState: '嫌你囉唆',
+                        gcReply: `${namesJoined}無奈地對望一眼，敷衍應了兩句便匆匆告辭。`
+                    },
+                    {
+                        text: `😔【心淡沉默生疏】嘆氣說：「算啦，你哋個個都嫌我老懵懂，我以後都唔煩你哋喇。」`,
+                        deltaClose: -12,
+                        deltaEmp: -6,
+                        nextState: '漸趨生疏',
+                        gcReply: `大家陷入尷尬的沉默，跨代之間的隔膜在不知不覺間加深了。`
+                    }
+                ];
+            }
+
+            return {
+                mode: 'grandchild_multi',
+                targets: gcs,
+                speakerName: `${namesJoined}（${gcs.length}位孫輩同時互動）`,
+                avatar: avatarsJoined,
+                category: category,
+                locationBadge: locNote,
+                healthNote: `你現年 ${playerAge} 歲 · 面對 ${gcs.length} 位不同性格的孫輩`,
+                bubbles: bubbles,
+                hint: hint,
+                choices: choices
+            };
+        }
+
+        // 4. SINGLE GRANDCHILD INTERACTION (Varied by Grandchild Stage & Player Elder Age)
+        function createGrandchildDialogue(gc, playerAge, topicVariant = 0) {
+            const isRemote = !gc.inHK;
+            const locNote = isRemote ? '海外視像/長途電話' : (gc.liveTogether ? '三代同堂同住' : '香港週末聚會');
+
+            let promptSituation = '';
+            let gcDirectQuote = '';
+            let hint = '';
+            let choices = [];
+
+            if (gc.currentAge <= 10) {
+                promptSituation = `你現年 ${playerAge} 歲，看著年僅 ${gc.currentAge} 歲的${gc.name}（${gc.health}）。`;
+                if (topicVariant % 2 === 0) {
+                    gcDirectQuote = `「我唔想著外套呀！隻手玩緊遊戲機唔得閒食飯住呀，你唔好成日喺我耳邊叫我啦！」`;
+                } else {
+                    gcDirectQuote = `「點解你行路咁慢、睇書又要戴老花眼鏡嘅？我想快啲去公園跑呀！」`;
+                }
+                hint = `角色轉換體驗：${gc.name}性格「${gc.personality}」，常傾向「${gc.tendency}」。身為長輩的你，現在終於明白當年爺嫲公婆的心情！`;
+                choices = [
+                    {
+                        text: '💕【溫柔同理與讚賞】先稱讚孫兒精靈活潑，再溫柔解釋：「著咗衫暖笠笠，食飽飯陪我去公園散步好唔好？」',
+                        styleTag: '溫暖包容',
+                        deltaClose: +12,
+                        deltaEmp: +10,
+                        gcReply: `${gc.name}開心地穿起外套拖住你的手：「好呀！多謝你，我陪你慢慢行！」`,
+                        nextState: '融洽親近'
+                    },
+                    {
+                        text: '🗣️【不斷重複囉唆叮嚀】每隔兩分鐘叫一次：「快啲著衫啦！食飯啦！睇壞眼呀！聽唔聽到我講嘢呀？」',
+                        styleTag: '慈愛但囉唆',
+                        deltaClose: -4,
+                        deltaEmp: +4,
+                        gcReply: `${gc.name}皺起小眉頭掩著耳朵說：「哎呀，你好囉唆呀！你今日講咗十次啦！」（你突然想起小時候自己也這樣對長輩說過...）`,
+                        nextState: '嫌你囉唆'
+                    },
+                    {
+                        text: '😠【以長輩威嚴嚴厲責備】直接拿走他的玩具訓話：「咁無規矩！老人家講嘢都唔聽！」',
+                        styleTag: '嚴厲責備',
+                        deltaClose: -12,
+                        deltaEmp: -5,
+                        gcReply: `${gc.name}委屈地大哭起來，躲到父母身後不敢再靠近你。`,
+                        nextState: '敬而遠之'
+                    }
+                ];
+            } else if (gc.currentAge <= 19) {
+                promptSituation = `你已 ${playerAge} 歲，開始出現明顯老花與膝關節退化。${gc.currentAge} 歲的少年${gc.name}（${gc.personality}）正處於青春期。`;
+                if (topicVariant % 2 === 0) {
+                    gcDirectQuote = `「得啦得啦，我返學同社交嘅嘢你唔明㗎喇，${isRemote ? '視像講兩句好收線喇，我仲要同同學傾計' : '你唔好成日問我考成點同去邊度玩啦'}！」`;
+                } else {
+                    gcDirectQuote = `「哎呀，你講電話唔好咁大聲啦，同埋呢件事你上星期咪問過我囉，真係好長氣呀！」`;
+                }
+                hint = `當你自己成為長輩，面對青春期孫兒的冷淡或嫌煩，你深刻體會到「不怕囉唆，最怕生疏」的滋味。`;
+                choices = [
+                    {
+                        text: '🌟【尊重傾聽與學習新事物】主動請教孫兒最近流行甚麼，耐心聽他分享校園與朋友趣事，不急於說教。',
+                        styleTag: '同理溝通',
+                        deltaClose: +15,
+                        deltaEmp: +12,
+                        gcReply: `${gc.name}眼睛一亮，放下戒心興奮地跟你聊了半小時：「估唔到你咁開通、咁明白我哋年輕人諗咩！」`,
+                        nextState: '融洽親近'
+                    },
+                    {
+                        text: '📢【反覆叮嚀與追問】不斷追問：「讀書考第幾呀？唔好掛住撳電話啦！出街記住早啲返呀！」',
+                        styleTag: '關切囉唆',
+                        deltaClose: -6,
+                        deltaEmp: +5,
+                        gcReply: `${gc.name}嘆了一口氣：「你每次見親我都係講呢幾句，好悶呀，我去做自己嘢先喇。」`,
+                        nextState: '嫌你囉唆'
+                    },
+                    {
+                        text: '😔【賭氣沉默不語】覺得孫兒不尊重自己，索性板起臉孔一句話也不說。',
+                        styleTag: '被動生疏',
+                        deltaClose: -14,
+                        deltaEmp: -8,
+                        gcReply: `氣氛變得冰冷尷尬，${gc.name}以為你不喜歡他，以後更少主動聯絡你了。`,
+                        nextState: '漸趨生疏'
+                    }
+                ];
+            } else {
+                promptSituation = `你已年屆 ${playerAge} 歲高齡，聽力與行動力明顯不如從前。成年的${gc.name}（${gc.currentAge}歲）工作繁忙，而你收到一份醫療保健及智能電話認證問題看不清楚。`;
+                gcDirectQuote = `「喂？我而家做嘢好忙呀，你有咩事快啲講啦？係咪部電話又唔識撳呀？」`;
+                hint = `生命是一場圓環：昔日爺嫲公婆向你求助的畫面，今天降臨在80歲前後的你身上。`;
+                choices = [
+                    {
+                        text: '💌【坦誠表達愛意與需要】溫和地說：「我好掛住你呀，有份文件我老花睇唔清，你得閒時可唔可以教下我？工作緊要也要保重身體。」',
+                        styleTag: '真誠慈愛',
+                        deltaClose: +16,
+                        deltaEmp: +15,
+                        gcReply: `${gc.name}深受感動，特意抽空陪伴你並耐心地為你朗讀文件：「以後有咩需要即管搵我，我永遠都唔會嫌你煩！」`,
+                        nextState: '融洽親近'
+                    },
+                    {
+                        text: '📞【一日打幾次電話催促】因為焦慮而連續致電追問：「點解唔聽電話呀？你係咪唔記得咗我啦？」',
+                        styleTag: '焦慮囉唆',
+                        deltaClose: -5,
+                        deltaEmp: +5,
+                        gcReply: `${gc.name}在忙亂中接起電話：「我開緊會呀！你唔好奪命追魂call啦，搞到我好大壓力呀！」`,
+                        nextState: '嫌你囉唆'
+                    },
+                    {
+                        text: '🤐【害怕被嫌煩而強忍不說】心想年輕人一定嫌老人家囉唆，寧願自己摸索也不敢開口向孫兒求助。',
+                        styleTag: '孤單生疏',
+                        deltaClose: -10,
+                        deltaEmp: -4,
+                        gcReply: `你獨自對著模糊的字跡嘆氣，深刻領悟到：原來長輩的囉唆不可怕，最怕的是彼此變得生疏客套。`,
+                        nextState: '漸趨生疏'
+                    }
+                ];
+            }
+
+            return {
+                mode: 'grandchild',
+                target: gc,
+                speakerName: `與 ${gc.name}（${gc.currentAge}歲）的互動`,
+                avatar: gc.avatar,
+                category: '跨代角色互換（你作為長輩）',
+                locationBadge: locNote,
+                healthNote: `孫輩性格：${gc.personality} · 傾向：${gc.tendency}`,
+                bubbles: [
+                    { speaker: `🧓 你的處境（${playerAge}歲）`, text: promptSituation },
+                    { speaker: `${gc.avatar} ${gc.name}（${gc.currentAge}歲）對你說`, text: gcDirectQuote }
+                ],
+                hint: hint,
+                choices: choices
+            };
+        }
+
+        /********************************************************************
+         * 6. MAIN SIMULATION LOOP (0 TO 85 YEARS OLD) & QUEUE SYSTEM
+         ********************************************************************/
+        function startLifeSimulation() {
+            playTone('event');
+            document.getElementById('screen-profile').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            gameState.currentAge = 0;
+            gameState.isPaused = false;
+            gameState.activeDialogue = null;
+            gameState.dialogueQueue = [];
+            gameState.gpInteractionCount = 0;
+            gameState.gcInteractionCount = 0;
+            gameState.triggeredEvents.clear();
+            gameState.logs = [];
+
+            addTimelineLog(0, `🎉 【生命起點】${gameState.playerName}在香港出生了！共有 ${gameState.grandparents.length} 位長輩（${gameState.grandparents.map(g => g.role).join('、')}）滿懷喜悅地迎接你的到來。`, 'highlight');
+
+            updateGameUI();
+            startTimerLoop();
+        }
+
+        function startTimerLoop() {
+            if (simulationTimer) clearInterval(simulationTimer);
+            const intervalMs = gameState.speedMultiplier === 1 ? 1300 : 680;
+            simulationTimer = setInterval(() => {
+                if (!gameState.isPaused && !gameState.activeDialogue) {
+                    if (gameState.dialogueQueue.length > 0) {
+                        const nextDlg = gameState.dialogueQueue.shift();
+                        triggerDialogueModal(nextDlg);
+                    } else {
+                        advanceOneYear();
+                    }
+                }
+            }, intervalMs);
+        }
+
+        function toggleSimulationPause() {
+            if (gameState.activeDialogue) {
+                showToast('請先完成當前的對話選擇，歲月便會繼續推進！');
+                return;
+            }
+            gameState.isPaused = !gameState.isPaused;
+            updatePauseButtonUI();
+        }
+
+        function updatePauseButtonUI() {
+            const btn = document.getElementById('btn-pause-resume');
+            const icon = document.getElementById('icon-pause-resume');
+            const text = document.getElementById('text-pause-resume');
+            if (gameState.isPaused) {
+                icon.className = 'fa-solid fa-play';
+                text.textContent = '繼續推進';
+                btn.className = 'px-3 py-1.5 rounded-lg bg-jade-600 text-white text-xs font-bold hover:bg-jade-700 transition flex items-center gap-1';
+            } else {
+                icon.className = 'fa-solid fa-pause';
+                text.textContent = '暫停推進';
+                btn.className = 'px-3 py-1.5 rounded-lg bg-warm-600 text-white text-xs font-bold hover:bg-warm-700 transition flex items-center gap-1';
+            }
+        }
+
+        function cycleSpeed() {
+            gameState.speedMultiplier = gameState.speedMultiplier === 1 ? 2 : 1;
+            document.getElementById('text-speed').textContent = `${gameState.speedMultiplier}x 速度`;
+            startTimerLoop();
+        }
+
+        // Allow player to proactively initiate an interaction at any time!
+        function triggerProactiveInteraction(type) {
+            if (gameState.activeDialogue) return;
+            const age = gameState.currentAge;
+
+            if (type === 'gp') {
+                const livingGps = gameState.grandparents.filter(g => g.isAlive);
+                if (livingGps.length === 0) {
+                    showToast('所有長輩已安詳離世，請珍惜與兒孫相處的時光。');
+                    return;
+                }
+                if (livingGps.length >= 2 && Math.random() < 0.5) {
+                    triggerDialogueModal(createMultiGrandparentDialogue(livingGps, age, age));
+                } else {
+                    const chosenGp = pickRandom(livingGps);
+                    triggerDialogueModal(createGrandparentDialogue(chosenGp, age, age + 1));
+                }
+            } else if (type === 'gc') {
+                const bornGcs = gameState.grandchildren.filter(g => g.isBorn && g.currentAge >= 2);
+                if (bornGcs.length === 0) {
+                    showToast('孫兒尚未長大至可對話階段，請稍候片刻！');
+                    return;
+                }
+                if (bornGcs.length >= 2 && Math.random() < 0.5) {
+                    triggerDialogueModal(createMultiGrandchildDialogue(bornGcs, age));
+                } else {
+                    const chosenGc = pickRandom(bornGcs);
+                    triggerDialogueModal(createGrandchildDialogue(chosenGc, age, age + 1));
+                }
+            }
+        }
+
+        function advanceOneYear() {
+            if (gameState.currentAge >= 85) {
+                finishGameAt85();
+                return;
+            }
+
+            gameState.currentAge++;
+            const age = gameState.currentAge;
+
+            // Update ages of living grandparents
+            gameState.grandparents.forEach(gp => {
+                if (gp.isAlive) {
+                    gp.currentAge++;
+                    if (age >= gp.playerAgeAtPass) {
+                        gp.isAlive = false;
+                        playTone('sad');
+                        const closenessMsg = gp.closeness >= 75
+                            ? `你們生前互動頻繁且關係親密，那些看似囉唆的叮嚀成為你一生最溫暖的回憶。`
+                            : `回想過去有時因嫌${gp.role}囉唆而顯得生疏，你心中湧起一絲「子欲養而親不待」的感慨。`;
+                        addTimelineLog(age, `🕯️ 【長輩離世】陪伴你走過 ${age} 年歲月的${gp.role}（享年${gp.lifespan}歲）安詳離世了。${closenessMsg}`, 'sad');
+                    }
+                }
+            });
+
+            // Milestone Logs
+            if (age === 6) addTimelineLog(age, `🎒 踏入小學階段，長輩經常叮囑你要專心讀書、注意坐姿。`, 'normal');
+            if (age === 12) addTimelineLog(age, `🏫 升讀中學步入青春期，你開始有自己的朋友圈與手機世界。`, 'normal');
+            if (age === 18) addTimelineLog(age, `🎓 18歲成人禮！你正接受「${gameState.education}」教育。`, 'normal');
+            if (age === 23) addTimelineLog(age, `💼 投身社會工作，成為一名「${gameState.adultJob}」。`, 'normal');
+            if (age === 30) {
+                addTimelineLog(age, `💍 成家立室並育有 ${gameState.childrenInfo.count} 位子女，親身體會為人父母的責任。`, 'highlight');
+            }
+
+            // Check Grandchildren Births (Midlife onwards)
+            gameState.grandchildren.forEach(gc => {
+                if (!gc.isBorn && age === gc.playerAgeAtBirth) {
+                    gc.isBorn = true;
+                    gc.currentAge = 0;
+                    playTone('warm');
+                    addTimelineLog(age, `👶 【抱孫之喜】你的${gc.name}出生了！你正式晉升為長輩（${gc.locationDesc}）。`, 'highlight');
+                } else if (gc.isBorn) {
+                    gc.currentAge++;
+                }
+            });
+
+            updateGameUI();
+
+            // Check if interactive dialogues should trigger at this age
+            checkAndTriggerInteraction(age);
+
+            if (age >= 85 && !gameState.activeDialogue && gameState.dialogueQueue.length === 0) {
+                finishGameAt85();
+            }
+        }
+
+        function checkAndTriggerInteraction(age) {
+            // High-frequency schedule across all stages for Grandparents:
+            // Infant(1,2), Toddler(4,5), Child(7,9,11), Teen(13,15,17), Youth(19,21,24), Adult(27,31,35,39,43)
+            const gpSingleAges = [1, 4, 7, 11, 13, 17, 19, 24, 27, 35, 43];
+            const gpMultiAges = [2, 5, 9, 15, 21, 31, 39];
+
+            const livingGps = gameState.grandparents.filter(g => g.isAlive);
+
+            if (livingGps.length > 0) {
+                if (gpMultiAges.includes(age) && livingGps.length >= 2) {
+                    // Simultaneous multi-grandparent interaction!
+                    gameState.dialogueQueue.push(createMultiGrandparentDialogue(livingGps, age, age));
+                } else if (gpSingleAges.includes(age) || gpMultiAges.includes(age)) {
+                    // Pick the living grandparent with fewest interactions so far
+                    const sorted = [...livingGps].sort((a, b) => a.interactionHistory.length - b.interactionHistory.length);
+                    gameState.dialogueQueue.push(createGrandparentDialogue(sorted[0], age, age));
+
+                    // If 3 or 4 grandparents are alive, occasionally queue a second individual grandparent at milestone ages
+                    if (livingGps.length >= 3 && (age === 7 || age === 13 || age === 19) && sorted[1]) {
+                        gameState.dialogueQueue.push(createGrandparentDialogue(sorted[1], age, age + 1));
+                    }
+                }
+            }
+
+            // High-frequency schedule across Midlife & Old Age for Grandchildren:
+            // Ages 49 to 84 (every 2-3 years, mixing individual and multi-grandchild interactions)
+            const gcSingleAges = [49, 52, 56, 60, 64, 68, 72, 76, 80, 83];
+            const gcMultiAges = [54, 58, 62, 66, 70, 74, 78, 82];
+
+            const bornGcs = gameState.grandchildren.filter(g => g.isBorn && g.currentAge >= 2);
+
+            if (bornGcs.length > 0) {
+                if (gcMultiAges.includes(age) && bornGcs.length >= 2) {
+                    // Simultaneous multi-grandchild interaction!
+                    gameState.dialogueQueue.push(createMultiGrandchildDialogue(bornGcs, age));
+                } else if (gcSingleAges.includes(age) || gcMultiAges.includes(age)) {
+                    const sortedGc = [...bornGcs].sort((a, b) => a.interactionHistory.length - b.interactionHistory.length);
+                    gameState.dialogueQueue.push(createGrandchildDialogue(sortedGc[0], age, age));
+
+                    // If player has 3+ grandchildren, queue an extra grandchild interaction at key elderly stages
+                    if (bornGcs.length >= 3 && (age === 64 || age === 72 || age === 80) && sortedGc[1]) {
+                        gameState.dialogueQueue.push(createGrandchildDialogue(sortedGc[1], age, age + 1));
+                    }
+                }
+            }
+
+            // Pop and display the first queued dialogue immediately
+            if (!gameState.activeDialogue && gameState.dialogueQueue.length > 0) {
+                const nextDlg = gameState.dialogueQueue.shift();
+                triggerDialogueModal(nextDlg);
+            }
+        }
+
+        function triggerDialogueModal(dialogueObj) {
+            playTone('event');
+            gameState.activeDialogue = dialogueObj;
+
+            document.getElementById('state-flowing').classList.add('hidden');
+            const dlgEl = document.getElementById('state-dialogue');
+            dlgEl.classList.remove('hidden');
+            dlgEl.classList.add('flex');
+
+            document.getElementById('dlg-avatar').textContent = dialogueObj.avatar;
+            document.getElementById('dlg-speaker-name').textContent = dialogueObj.speakerName;
+            document.getElementById('dlg-type-badge').textContent = dialogueObj.category;
+            document.getElementById('dlg-location-badge').textContent = dialogueObj.locationBadge;
+            document.getElementById('dlg-speaker-health-note').textContent = dialogueObj.healthNote;
+            document.getElementById('dlg-age-stamp').textContent = `你 ${gameState.currentAge} 歲時`;
+
+            const queueBadge = document.getElementById('dlg-queue-badge');
+            if (gameState.dialogueQueue.length > 0) {
+                queueBadge.textContent = `尚有 ${gameState.dialogueQueue.length} 個家人互動等候中`;
+            } else {
+                queueBadge.textContent = '';
+            }
+
+            // Render single or multiple speaker bubbles
+            const msgBox = document.getElementById('dlg-messages-box');
+            msgBox.innerHTML = (dialogueObj.bubbles || []).map(b => `
+                <div class="chat-bubble-left p-3 text-xs sm:text-sm text-warm-900 leading-relaxed shadow-2xs fade-in">
+                    <div class="font-bold text-warm-700 text-[11px] mb-1">${b.speaker}</div>
+                    <div>${b.text}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('dlg-empathy-text').textContent = dialogueObj.hint;
+
+            const choicesBox = document.getElementById('dlg-choices-container');
+            choicesBox.innerHTML = dialogueObj.choices.map((c, idx) => `
+                <button
+                    onclick="selectDialogueChoice(${idx})"
+                    class="w-full text-left p-3 rounded-2xl bg-white hover:bg-warm-100 border-2 border-warm-200 hover:border-warm-500 text-xs sm:text-sm text-warm-900 font-medium transition flex items-start gap-2.5 shadow-2xs"
+                >
+                    <span class="w-6 h-6 rounded-full bg-warm-200 text-warm-900 font-bold flex items-center justify-center shrink-0 mt-0.5">${idx + 1}</span>
+                    <span>${c.text}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectDialogueChoice(choiceIdx) {
+            if (!gameState.activeDialogue) return;
+            const dlg = gameState.activeDialogue;
+            const choice = dlg.choices[choiceIdx];
+
+            if (choice.deltaClose >= 0) {
+                playTone('warm');
+            } else {
+                playTone('sad');
+            }
+
+            const isGpMode = dlg.mode === 'grandparent' || dlg.mode === 'grandparent_multi';
+            const outcomeReply = isGpMode ? choice.reply : choice.gcReply;
+
+            // Support both single target and multi-targets!
+            const targetList = dlg.targets ? dlg.targets : [dlg.target];
+
+            targetList.forEach(t => {
+                t.closeness = Math.max(10, Math.min(100, t.closeness + choice.deltaClose));
+                t.relationshipState = choice.nextState;
+                t.interactionHistory.push({
+                    playerAge: gameState.currentAge,
+                    category: dlg.category,
+                    choiceText: choice.text,
+                    outcome: outcomeReply,
+                    stateAfter: choice.nextState
+                });
+            });
+
+            if (isGpMode) {
+                gameState.gpInteractionCount += targetList.length;
+            } else {
+                gameState.gcInteractionCount += targetList.length;
+            }
+
+            gameState.empathyScore = Math.max(15, Math.min(100, gameState.empathyScore + choice.deltaEmp));
+
+            // Show immediate reply inside dialogue box before resuming
+            const msgBox = document.getElementById('dlg-messages-box');
+            msgBox.innerHTML += `
+                <div class="chat-bubble-right p-3 text-xs sm:text-sm text-jade-900 leading-relaxed ml-6 fade-in">
+                    <strong>你的回應：</strong>${choice.text}
+                </div>
+                <div class="chat-bubble-left p-3 text-xs sm:text-sm text-warm-900 leading-relaxed fade-in bg-amber-50/70">
+                    <strong>互動結果（關係變為「${choice.nextState}」）：</strong>${outcomeReply}
+                </div>
+            `;
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            const nextBtnLabel = gameState.dialogueQueue.length > 0
+                ? `繼續下一位家人的互動（尚有 ${gameState.dialogueQueue.length} 個）`
+                : `記住這份體會，繼續推進人生歲月`;
+
+            const choicesBox = document.getElementById('dlg-choices-container');
+            choicesBox.innerHTML = `
+                <button
+                    onclick="closeDialogueAndResume()"
+                    class="w-full py-3 rounded-2xl bg-jade-600 hover:bg-jade-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+                >
+                    <span>${nextBtnLabel}</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            `;
+
+            const namesLabel = targetList.map(t => t.role || t.name).join('、');
+            const logPrefix = isGpMode ? `💬 【與${namesLabel}互動】` : `🌱 【與${namesLabel}互動】`;
+            addTimelineLog(gameState.currentAge, `${logPrefix} ${outcomeReply}（目前關係：${choice.nextState}）`, choice.deltaClose >= 0 ? 'warm' : 'normal');
+
+            updateGameUI();
+        }
+
+        function closeDialogueAndResume() {
+            playTone('click');
+            gameState.activeDialogue = null;
+
+            // If another interaction is queued at this age, open it immediately!
+            if (gameState.dialogueQueue.length > 0) {
+                const nextDlg = gameState.dialogueQueue.shift();
+                triggerDialogueModal(nextDlg);
+                return;
+            }
+
+            document.getElementById('state-dialogue').classList.add('hidden');
+            document.getElementById('state-dialogue').classList.remove('flex');
+            document.getElementById('state-flowing').classList.remove('hidden');
+
+            if (gameState.currentAge >= 85) {
+                finishGameAt85();
+            }
+        }
+
+        function addTimelineLog(age, text, styleType) {
+            gameState.logs.unshift({ age, text, styleType });
+            const logContainer = document.getElementById('life-timeline-log');
+            if (!logContainer) return;
+
+            logContainer.innerHTML = gameState.logs.map(item => {
+                let badgeClass = 'bg-warm-200 text-warm-900';
+                let boxClass = 'bg-white border-warm-200';
+                if (item.styleType === 'highlight') {
+                    badgeClass = 'bg-amber-500 text-white';
+                    boxClass = 'bg-amber-50/80 border-amber-200';
+                } else if (item.styleType === 'warm') {
+                    badgeClass = 'bg-jade-600 text-white';
+                    boxClass = 'bg-jade-50/80 border-jade-200';
+                } else if (item.styleType === 'sad') {
+                    badgeClass = 'bg-stone-600 text-white';
+                    boxClass = 'bg-stone-100 border-stone-300';
+                }
+                return `
+                    <div class="p-2.5 rounded-xl border ${boxClass} flex items-start gap-2 fade-in">
+                        <span class="px-2 py-0.5 rounded-md font-bold text-[10px] shrink-0 ${badgeClass}">${item.age}歲</span>
+                        <span class="text-warm-900 leading-snug">${item.text}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /********************************************************************
+         * 7. RENDER REAL-TIME GAME PANELS
+         ********************************************************************/
+        function updateGameUI() {
+            const age = gameState.currentAge;
+            const stage = getLifeStageInfo(age);
+
+            document.getElementById('game-player-name').textContent = gameState.playerName;
+            document.getElementById('game-age-num').textContent = age;
+            document.getElementById('game-avatar-badge').textContent = stage.avatar;
+            document.getElementById('game-stage-badge').textContent = stage.name;
+            document.getElementById('game-role-badge').textContent = `你的身分：${stage.role}`;
+            document.getElementById('game-age-bar').style.width = `${Math.min(100, (age / 85) * 100)}%`;
+
+            const subtitleEl = document.getElementById('game-status-subtitle');
+            if (age < 23) {
+                subtitleEl.textContent = `求學成長階段（${gameState.education}）· 父母婚姻：${gameState.family.maritalStatus}`;
+            } else if (age < 65) {
+                subtitleEl.textContent = `任職：${gameState.adultJob} · 育有 ${gameState.childrenInfo.count} 名子女`;
+            } else {
+                subtitleEl.textContent = `退休安享晚年 · 身體機能逐漸退化，最渴望兒孫主動問候與陪伴`;
+            }
+
+            // Update total interaction count badge
+            const gpBadge = document.getElementById('gp-total-interactions-badge');
+            if (gpBadge) {
+                gpBadge.textContent = `已互動 ${gameState.gpInteractionCount} 人次`;
+            }
+
+            // Toggle proactive buttons based on living grandparents / born grandchildren
+            const livingGps = gameState.grandparents.filter(g => g.isAlive);
+            const bornGcs = gameState.grandchildren.filter(g => g.isBorn && g.currentAge >= 2);
+            const btnGp = document.getElementById('btn-proactive-gp');
+            const btnGc = document.getElementById('btn-proactive-gc');
+            if (btnGp) {
+                if (livingGps.length > 0) {
+                    btnGp.classList.remove('hidden');
+                } else {
+                    btnGp.classList.add('hidden');
+                }
+            }
+            if (btnGc) {
+                if (bornGcs.length > 0) {
+                    btnGc.classList.remove('hidden');
+                } else {
+                    btnGc.classList.add('hidden');
+                }
+            }
+
+            // Render Grandparents Panel
+            const gpListEl = document.getElementById('panel-grandparents-list');
+            gpListEl.innerHTML = gameState.grandparents.map((gp, idx) => {
+                const statusBadge = gp.isAlive
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">${gp.relationshipState}</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700">已安詳離世 (享年${gp.lifespan}歲)</span>`;
+
+                return `
+                    <div onclick="inspectCharacter('gp', ${idx})" class="p-3 rounded-xl border ${gp.isAlive ? 'bg-white border-warm-200 hover:border-warm-400' : 'bg-stone-100/80 border-stone-200 opacity-75'} cursor-pointer transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">${gp.avatar}</span>
+                                <div>
+                                    <h4 class="font-bold text-xs sm:text-sm text-warm-900">${gp.role} ${gp.isAlive ? `(${gp.currentAge}歲)` : ''}</h4>
+                                    <span class="text-[10px] text-warm-600 block">${gp.inHK ? (gp.liveTogether ? '🏠 同住' : '🇭🇰 在港不同住') : '✈️ 海外視像聯絡'} · 互動 ${gp.interactionHistory.length} 次</span>
+                                </div>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        <div class="w-full h-1.5 bg-warm-100 rounded-full overflow-hidden">
+                            <div class="h-full ${gp.closeness >= 70 ? 'bg-rose-500' : 'bg-amber-500'}" style="width: ${gp.closeness}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-warm-600 mt-1">
+                            <span>親密度：${gp.closeness}%</span>
+                            <span>${gp.health.hearing}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render Grandchildren Panel
+            const allBornGcs = gameState.grandchildren.filter(g => g.isBorn);
+            const tagEl = document.getElementById('panel-offspring-status-tag');
+            const gcListEl = document.getElementById('panel-grandchildren-list');
+
+            if (age < 30) {
+                tagEl.textContent = '尚未成家';
+            } else if (allBornGcs.length === 0) {
+                tagEl.textContent = `育有${gameState.childrenInfo.count}名子女`;
+                gcListEl.innerHTML = `
+                    <div class="p-3 rounded-xl bg-jade-50/60 border border-jade-100 text-xs text-warm-800">
+                        <p class="font-bold text-jade-800 mb-1">子女正成長中（${gameState.childrenInfo.maritalStatus}）</p>
+                        <p class="text-[11px] text-warm-600">再過幾年當你踏入中年，孫兒便會陸續出生，屆時將由你決定如何與孫輩互動。</p>
+                    </div>
+                `;
+            } else {
+                tagEl.textContent = `已互動 ${gameState.gcInteractionCount} 人次`;
+                gcListEl.innerHTML = allBornGcs.map((gc) => {
+                    const origIdx = gameState.grandchildren.indexOf(gc);
+                    return `
+                        <div onclick="inspectCharacter('gc', ${origIdx})" class="p-3 rounded-xl bg-white border border-jade-200 hover:border-jade-400 cursor-pointer transition fade-in">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl">${gc.avatar}</span>
+                                    <div>
+                                        <h4 class="font-bold text-xs sm:text-sm text-warm-900">${gc.name} (${gc.currentAge}歲)</h4>
+                                        <span class="text-[10px] text-jade-700 block">${gc.inHK ? (gc.liveTogether ? '🏠 與你同住' : '🇭🇰 在港分住') : '✈️ 海外視像聯絡'} · 互動 ${gc.interactionHistory.length} 次</span>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-jade-100 text-jade-800">${gc.relationshipState}</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-warm-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-jade-500" style="width: ${gc.closeness}%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-warm-600 mt-1">
+                                <span>親密度：${gc.closeness}%</span>
+                                <span>${gc.tendency}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Update Scoreboard Bars
+            document.getElementById('stat-empathy-val').textContent = `${gameState.empathyScore}%`;
+            document.getElementById('stat-empathy-bar').style.width = `${gameState.empathyScore}%`;
+
+            const avgGp = Math.round(gameState.grandparents.reduce((acc, g) => acc + g.closeness, 0) / gameState.grandparents.length);
+            document.getElementById('stat-gp-bond-val').textContent = `${avgGp}%`;
+            document.getElementById('stat-gp-bond-bar').style.width = `${avgGp}%`;
+
+            if (allBornGcs.length > 0) {
+                const avgGc = Math.round(allBornGcs.reduce((acc, g) => acc + g.closeness, 0) / allBornGcs.length);
+                document.getElementById('stat-gc-bond-val').textContent = `${avgGc}%`;
+                document.getElementById('stat-gc-bond-bar').style.width = `${avgGc}%`;
+            }
+        }
+
+        function inspectCharacter(type, idx) {
+            playTone('click');
+            const body = document.getElementById('modal-char-body');
+            const title = document.getElementById('modal-char-title');
+
+            if (type === 'gp') {
+                const gp = gameState.grandparents[idx];
+                title.textContent = `${gp.avatar} ${gp.role} 的詳細狀況檔案`;
+                body.innerHTML = `
+                    <p><strong>目前狀態：</strong>${gp.isAlive ? `健在（現年 ${gp.currentAge} 歲）` : `已離世（於你 ${gp.playerAgeAtPass} 歲時安詳離世）`}</p>
+                    <p><strong>教育及昔日職業：</strong>${gp.education}｜${gp.pastJob}</p>
+                    <p><strong>居住與聯絡方式：</strong>${gp.locationDesc}</p>
+                    <p><strong>行動與感官能力：</strong>${gp.health.mobility}、${gp.health.vision}、${gp.health.hearing}</p>
+                    <p><strong>表達與理解狀況：</strong>${gp.health.expression}｜${gp.health.comprehension}</p>
+                    <p><strong>長期病患紀錄：</strong>${gp.health.chronicIllness}</p>
+                    <p><strong>經濟狀況：</strong>${gp.economy}</p>
+                    <p><strong>性格與互動變化：</strong>${gp.personality}（目前關係：<span class="font-bold text-rose-700">${gp.relationshipState}</span>，親密度 ${gp.closeness}%）</p>
+                `;
+            } else {
+                const gc = gameState.grandchildren[idx];
+                title.textContent = `${gc.avatar} ${gc.name} 的詳細狀況檔案`;
+                body.innerHTML = `
+                    <p><strong>目前年齡：</strong>${gc.currentAge} 歲（於你 ${gc.playerAgeAtBirth} 歲時出生）</p>
+                    <p><strong>居住與聯絡方式：</strong>${gc.locationDesc}</p>
+                    <p><strong>健康狀況：</strong>${gc.health}</p>
+                    <p><strong>經濟狀況：</strong>${gc.economy}</p>
+                    <p><strong>性格與互動傾向：</strong>${gc.personality}（常傾向：${gc.tendency}）</p>
+                    <p><strong>與你的關係狀態：</strong><span class="font-bold text-jade-700">${gc.relationshipState}</span>（親密度 ${gc.closeness}%）</p>
+                `;
+            }
+            openModal('modal-char-detail');
+        }
+
+        /********************************************************************
+         * 8. FINISH AT 85 & GENERATE REFLECTION + SHARE SUMMARY
+         ********************************************************************/
+        function finishGameAt85() {
+            if (simulationTimer) clearInterval(simulationTimer);
+            playTone('warm');
+
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-summary').classList.remove('hidden');
+
+            document.getElementById('sum-player-name').textContent = gameState.playerName;
+
+            const avgGp = Math.round(gameState.grandparents.reduce((acc, g) => acc + g.closeness, 0) / gameState.grandparents.length);
+            const avgGc = Math.round(gameState.grandchildren.reduce((acc, g) => acc + g.closeness, 0) / gameState.grandchildren.length);
+
+            let gpTitle = avgGp >= 80 ? '知心孝順・毫無生疏' : (avgGp >= 65 ? '溫情相伴・偶有囉唆' : '遺憾生疏・時光飛逝');
+            let gcTitle = avgGc >= 80 ? '開明慈祥・跨代知己' : (avgGc >= 65 ? '關愛深切・偶被嫌煩' : '彼此隔膜・默默掛念');
+
+            document.getElementById('sum-gp-title').textContent = gpTitle;
+            document.getElementById('sum-gp-score').textContent = `平均親密度 ${avgGp}%（共互動 ${gameState.gpInteractionCount} 人次）`;
+            document.getElementById('sum-gc-title').textContent = gcTitle;
+            document.getElementById('sum-gc-score').textContent = `平均親密度 ${avgGc}%（共互動 ${gameState.gcInteractionCount} 人次）`;
+            document.getElementById('sum-empathy-score').textContent = `${gameState.empathyScore} 分`;
+
+            document.getElementById('sum-epitaph').innerHTML = `
+                你在 85 歲這一年走完了充實的一生（曾任職<strong>${gameState.adultJob}</strong>）。<br>
+                前半生，你與 <strong>${gameState.grandparents.map(g => g.role).join('、')}</strong> 經歷了 <strong>${gameState.gpInteractionCount} 人次</strong> 的跨階段互動；後半生，當面對 <strong>${gameState.grandchildren.length} 位孫輩</strong>（共 <strong>${gameState.gcInteractionCount} 人次</strong> 互動）時，你終於明白每一句「囉唆」背後，其實都是「最怕彼此生疏」的深情。
+            `;
+
+            // Breakdown lists
+            const gpBreakdown = document.getElementById('sum-gp-breakdown');
+            gpBreakdown.innerHTML = gameState.grandparents.map(gp => `
+                <div class="p-3 rounded-xl bg-warm-50 border border-warm-200">
+                    <div class="flex justify-between font-bold text-warm-900 mb-1">
+                        <span>${gp.avatar} ${gp.role}（於你${gp.playerAgeAtPass}歲時離世，享年${gp.lifespan}歲）</span>
+                        <span class="text-rose-700">${gp.relationshipState} (${gp.closeness}%)</span>
+                    </div>
+                    <p class="text-xs text-warm-700">生前共互動 <strong>${gp.interactionHistory.length} 次</strong>｜狀況：${gp.health.vision}、${gp.health.hearing}｜${gp.locationDesc}</p>
+                </div>
+            `).join('');
+
+            const gcBreakdown = document.getElementById('sum-gc-breakdown');
+            gcBreakdown.innerHTML = gameState.grandchildren.map(gc => `
+                <div class="p-3 rounded-xl bg-jade-50/70 border border-jade-200">
+                    <div class="flex justify-between font-bold text-warm-900 mb-1">
+                        <span>${gc.avatar} ${gc.name}（你85歲時他/她已 ${gc.currentAge} 歲）</span>
+                        <span class="text-jade-700">${gc.relationshipState} (${gc.closeness}%)</span>
+                    </div>
+                    <p class="text-xs text-warm-700">共互動 <strong>${gc.interactionHistory.length} 次</strong>｜性格傾向：${gc.tendency}｜${gc.locationDesc}</p>
+                </div>
+            `).join('');
+
+            updateReflectionPreview();
+        }
+
+        function addActionTag(tagText) {
+            const input = document.getElementById('reflect-action-input');
+            if (!input.value.includes(tagText)) {
+                input.value = input.value ? `${input.value}；${tagText}` : tagText;
+                updateReflectionPreview();
+            }
+        }
+
+        function updateReflectionPreview() {
+            const avgGp = Math.round(gameState.grandparents.reduce((acc, g) => acc + g.closeness, 0) / gameState.grandparents.length);
+            const avgGc = Math.round(gameState.grandchildren.reduce((acc, g) => acc + g.closeness, 0) / gameState.grandchildren.length);
+            const timeVal = document.getElementById('reflect-time-select').value;
+            const actionVal = document.getElementById('reflect-action-input').value.trim() || '主動關心長輩，耐心傾聽他們的需要。';
+
+            const shareText = `🌱【不怕囉唆 & 最怕生疏｜85年人生價值觀教育體驗】
+👤 玩家：${gameState.playerName}（走過0至85歲的四代人生）
+❤️ 與長輩（${gameState.grandparents.map(g => g.role).join('、')}）平均親密度：${avgGp}%
+👶 成為長輩後與孫輩平均親密度：${avgGc}%
+🌟 跨代同理心指數：${gameState.empathyScore}分
+
+💭 我的生命反思：
+・平日陪伴長輩時間：${timeVal}
+・我的孝親行動承諾：「${actionVal}」
+
+✨ 體會：小時候總覺得長輩重複叮嚀好囉唆；直到自己也白髮蒼蒼，才懂得每一句囉唆背後，都是怕彼此生疏的掛念。珍惜眼前人！
+#不怕囉唆最怕生疏 #孝親文化 #跨代同理心 #價值觀教育`;
+
+            document.getElementById('share-text-preview').textContent = shareText;
+        }
+
+        function getShareText() {
+            return document.getElementById('share-text-preview').textContent;
+        }
+
+        function copyShareSummary() {
+            const text = getShareText();
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                playTone('warm');
+                showToast('已複製85年人生總結與反思！可直接貼上至 IG / 微信 / 社交平台分享。');
+            } catch (err) {
+                showToast('複製失敗，請手動選取文字複製。');
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        function shareToPlatform(platform) {
+            const text = encodeURIComponent(getShareText());
+            const pageUrl = encodeURIComponent(window.location.href);
+            let targetUrl = '';
+
+            if (platform === 'whatsapp') {
+                targetUrl = `https://api.whatsapp.com/send?text=${text}`;
+            } else if (platform === 'facebook') {
+                copyShareSummary();
+                targetUrl = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}&quote=${text}`;
+            } else if (platform === 'x') {
+                targetUrl = `https://twitter.com/intent/tweet?text=${text}`;
+            }
+
+            if (targetUrl) {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        function resetAndPlayAgain() {
+            playTone('click');
+            document.getElementById('screen-summary').classList.add('hidden');
+            document.getElementById('screen-intro').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
